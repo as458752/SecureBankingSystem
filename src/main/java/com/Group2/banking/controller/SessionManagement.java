@@ -13,19 +13,19 @@ import javax.servlet.http.HttpServletResponse;
  * @author Jing
  */
 public class SessionManagement {
-    public static void update(HttpServletRequest request, String userId)
+    public static void update(HttpServletRequest request, String key, String value)
     {
         HttpSession session = request.getSession();
-	session.removeAttribute("userId");
-        session.setAttribute("userId", userId);
+	session.removeAttribute(key);
+        session.setAttribute(key, value);
 	//setting session to expiry in 3 mins
 	session.setMaxInactiveInterval(3*60);
     }
     
-    public static String check(HttpServletRequest request)
+    public static String check(HttpServletRequest request, String key)
     {
         HttpSession session = request.getSession();
-        Object obj = session.getAttribute("userId");
+        Object obj = session.getAttribute(key);
         if (obj == null)    return "";
         else    return obj.toString();
     }
