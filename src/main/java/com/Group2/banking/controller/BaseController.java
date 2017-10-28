@@ -7,7 +7,6 @@ import java.sql.Types;
 
 import javax.servlet.http.HttpServletRequest;
 import com.group2.banking.service.*;
-import com.group2.banking.service.MutexLock;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 
@@ -197,11 +196,17 @@ public class BaseController {
 			@ModelAttribute("login") Login login) {
 		try {
                     String s = request.getParameter("g-recaptcha-response");
-			request.getSession().invalidate();
-		System.out.println("Inside login");
-		ModelAndView mav = new ModelAndView("otp");
-		User user = userService.validateUser(login);
-		if (null != user) {
+                    if(!CaptchaValidation.verify(s))
+                    {
+                        ModelAndView mav = new ModelAndView("login");
+			mav.addObject("error", "Please check I'm not a robot button!");
+			return mav;
+                    }
+                    request.getSession().invalidate();
+                    System.out.println("Inside login");
+                    ModelAndView mav = new ModelAndView("otp");
+                    User user = userService.validateUser(login);
+                    if (null != user) {
 			if(user.getstatus()==4){
 				mav = new ModelAndView("login");
 				mav.addObject("error", "Your account has been Locked because of multiple failed login attempts. Contact the GoSwiss technical support for assistance.");
