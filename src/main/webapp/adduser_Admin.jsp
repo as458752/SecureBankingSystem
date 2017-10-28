@@ -5,17 +5,35 @@
 
 <c:set var="contextPath" value="${pageContext.request.contextPath}" />
 
-<%
-response.setHeader( "Pragma", "no-cache" );
-response.setHeader( "Cache-Control", "no-cache" );
-response.setDateHeader( "Expires", 0 );
-%>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
 
 <script language="javascript">
+
+function validateSession(){
+	<%
+	response.setHeader( "Pragma", "no-cache" );
+	   response.setHeader( "Cache-Control", "no-cache" );
+	   response.setDateHeader( "Expires", 0 );
+	   
+	   try{
+		   if(SessionManagement.check(request,"user_id")==null || SessionManagement.check(request,"user_id").equals("") || SessionManagement.check(request,"user_id").equals("null")){
+				response.sendRedirect("login.jsp");
+				return;
+			}
+		   
+		   if(!SessionManagement.check(request,"user_role").equals("3")){
+			   response.sendRedirect("AuthError.jsp");
+				return;
+		   }
+	   }
+	   catch(Exception e){
+		   response.sendRedirect("error.jsp");
+		   return;
+	   }
+	%>
+}
 
 	function valueChanged1(c1) {
 		if (document.myform.c1.checked)
@@ -135,19 +153,11 @@ response.setDateHeader( "Expires", 0 );
 				alert("Q1 must have an answer!");
 				return false;
 			}
-			if(a1.length>99){
-				alert("Q1 cannot have more than 100 characters");
-				return false;
-			}
 			counter++;
 		}
 		if (q2) {
 			if (a2 == "" || a2.length == 0 || a2 == null) {
 				alert("Q2 must have an answer!");
-			}
-			if(a2.length>99){
-				alert("Q2 cannot have more than 100 characters");
-				return false;
 			}
 			counter++;
 		}
@@ -155,19 +165,11 @@ response.setDateHeader( "Expires", 0 );
 			if (a3 == "" || a3.length == 0 || a3 == null) {
 				alert("Q3 must have an answer!");
 			}
-			if(a3.length>99){
-				alert("Q3 cannot have more than 100 characters");
-				return false;
-			}
 			counter++;
 		}
 		if (q4) {
 			if (a4 == "" || a4.length == 0 || a4 == null) {
 				alert("Q4 must have an answer!");
-			}
-			if(a4.length>99){
-				alert("Q4 cannot have more than 100 characters");
-				return false;
 			}
 			counter++;
 		}
@@ -175,19 +177,11 @@ response.setDateHeader( "Expires", 0 );
 			if (a5 == "" || a5.length == 0 || a5 == null) {
 				alert("Q5 must have an answer!");
 			}
-			if(a5.length>99){
-				alert("Q5 cannot have more than 100 characters");
-				return false;
-			}
 			counter++;
 		}
 		if (q6) {
 			if (a6 == "" || a6.length == 0 || a6 == null) {
 				alert("Q6 must have an answer!");
-			}
-			if(a6.length>99){
-				alert("Q6 cannot have more than 100 characters");
-				return false;
 			}
 			counter++;
 		}
@@ -218,7 +212,9 @@ response.setDateHeader( "Expires", 0 );
     <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
 </head>
-<body >
+<body onpageshow="validateSession()">
+
+<jsp:include page="header.jsp"></jsp:include>
 
 	<div class="container"></div>
 	<h1>
@@ -227,10 +223,10 @@ response.setDateHeader( "Expires", 0 );
 	<br>
 	<br>
 	<div class="userform">
-		<form method="POST" name="myform" action="${contextPath}/adduser"
+		<form method="POST" name="myform" action="${contextPath}/adduser_admin"
 			onsubmit="return validate();" class="form-signin">
 			<fieldset>
-				<span>${message}</span> <span>${message1}</span>
+				<span>${message}</span> 
 				<h2>
 					<legend>
 						<strong>User information:</strong>
@@ -241,24 +237,23 @@ response.setDateHeader( "Expires", 0 );
 				<br> <strong>Last name:</strong><br> <input type="text"
 					name="lastname" required><br>
 				<br> <strong>User name:</strong><br> <input type="text"
-					name="username" required><br> <br> <strong>Password:</strong><br>
-				<input type="password" name="password" required><br> <br>
-
-				<strong>Re-enter Password:</strong><br> <input type="password"
-					name="password2" required><br> <br> <strong>E-mail:</strong><br>
+					name="username" required><br> <br> 
+					 <strong>E-mail:</strong><br>
 				<input type="text" name="Email" required><br> <br>
 				<strong>Address:</strong><br> <input type="text" name="Address"
 					required><br> <br> <strong>Phone:</strong><br>
 				<input type="number" name="Phone" required><br> <br>
 
 				<strong>Roles:</strong><br> <select name="Role">
-					<option value="4">Individual User</option>
-					<option value="5">Merchant</option>
+					<option value="1">Regular Employee</option>
+					<option value="2">System Manager</option>
+					<option value="3">Administrator</option>
+				</select>
 
 
 
-
-				</select> <br> <br> <strong>Type 3 Security Questions and
+		
+				<!-- 		</select> <br> <br> <strong>Type 3 Security Questions and
 					Answers:</strong><br>
 				<br> <input type="checkbox" name="c1" value="1"
 					onchange="valueChanged1(this)"> What was your childhood nickname? <input type="text"
@@ -284,8 +279,7 @@ response.setDateHeader( "Expires", 0 );
 					onchange="valueChanged6(this)">What was the name of the hospital where you were born? <input type="text"
 					name="Q6" style="visibility: hidden">
 
-
-				<!--  <strong>Question 1:</strong><input type="text" name="Question1"><br>
+ <strong>Question 1:</strong><input type="text" name="Question1"><br>
  <strong>Answer 1:</strong><input type="text" name="Answer1"><br><br>
  <strong>Question 2:</strong><input type="text" name="Question2"><br>
  <strong>Answer 2:</strong><input type="text" name="Answer2"><br><br>

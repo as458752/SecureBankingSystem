@@ -1,4 +1,4 @@
-package com.Group2.banking.model;
+package com.group2.banking.model;
 
 public class Login {
 	  private String username;

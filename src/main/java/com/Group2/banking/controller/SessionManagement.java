@@ -1,18 +1,17 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-package com.Group2.banking.controller;
+package com.group2.banking.controller;
+
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import java.util.concurrent.*;
 /**
  *
  * @author Jing
  */
 public class SessionManagement {
+	private static ConcurrentHashMap<String,ConcurrentHashMap<String,Object>> sessions = null;
     public static void update(HttpServletRequest request, String key, String value)
     {
         HttpSession session = request.getSession();
@@ -48,4 +47,5 @@ public class SessionManagement {
         }
         return false;
     }
+    
 }

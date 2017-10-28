@@ -2,21 +2,41 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form"%>
 <%@ page import="com.group2.banking.controller.*" %>
+<%@ page import="com.group2.banking.service.*" %>
+<%@ page import="java.sql.*" %>
 
 <c:set var="contextPath" value="${pageContext.request.contextPath}" />
-
-<%
-response.setHeader( "Pragma", "no-cache" );
-response.setHeader( "Cache-Control", "no-cache" );
-response.setDateHeader( "Expires", 0 );
-%>
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<%	 
 
+
+response.setHeader( "Pragma", "no-cache" );
+response.setHeader( "Cache-Control", "no-cache" );
+response.setDateHeader( "Expires", 0 );
+				try{
+					Boolean test = false;
+					ResultSet rs = DBConnector.getQueryResult("select * from user_ques_mapping where user_id="+SessionManagement.check(request,"user_id"));
+					if(rs.next()){ test = true;}
+%>
 <script language="javascript">
 
+function validateSession(){
+	<%
+   try {
+		if(SessionManagement.check(request,"user_id")==null || SessionManagement.check(request,"user_id").equals("") || SessionManagement.check(request,"user_id").equals("null")){
+			response.sendRedirect("login.jsp");
+			return;
+		}
+	    }
+	    catch(Exception e)
+	    {
+		    response.sendRedirect("error.jsp");
+	    } 
+	%>
+}
 	function valueChanged1(c1) {
 		if (document.myform.c1.checked)
 			document.myform.Q1.style.visibility = 'visible';
@@ -60,18 +80,9 @@ response.setDateHeader( "Expires", 0 );
 	}
 
 	function validate() {
-		var a = document.myform.username.value;
-		var b = document.myform.firstname.value;
-		var c = document.myform.lastname.value;
-
-		var d = document.myform.password.value;
-		var p = document.myform.password2.value;
-
-		var e = document.myform.Email.value;
-		var f = document.myform.Address.value;
-		var g = document.myform.Phone.value;
-
- 		var q1 = document.myform.c1.checked;
+		
+		<%if(!test){%>
+		var q1 = document.myform.c1.checked;
 		var a1 = document.myform.Q1.value;
 		var q2 = document.myform.c2.checked;
 		var a2 = document.myform.Q2.value;
@@ -83,54 +94,9 @@ response.setDateHeader( "Expires", 0 );
 		var a5 = document.myform.Q5.value;
 		var q6 = document.myform.c6.checked;
 		var a6 = document.myform.Q6.value;
-
-		var passw = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,20}$/;
-		if (!d.match(passw)) {
-			alert("Password should have 6 to 20 characters in which at least one numeric digit, one uppercase and one lowercase letter");
-			return false;
-		}
-
-		if (a.length > 20) {
-			alert("Username can not have more than 20 characters");
-			return false;
-		} else if (b.length > 20) {
-			alert("Firstname can not have more than 20 characters");
-			return false;
-		} else if (c.length > 20) {
-			alert("Lastname can not have more than 20 characters");
-			return false;
-		} else if (p != d) {
-			alert("Password and Re-entered password should be same");
-			return false;
-		} else if (p.length > 20) {
-			alert("Password can not have more than 20 characters");
-			return false;
-		}
-		   else if(g<0)
-           {  
-               alert("Phone number cannot be negative");
-               return false; 
-           }
-		else if (e.length > 40) {
-			alert("Email can not have more than 40 characters");
-			return false;
-			if (!(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(e.value)))  
-			  {  
-				alert("You have entered an invalid email address!");
-				return false;
-			  }  
-		} else if (f.length > 20) {
-			alert("Address can not have more than  20 characters");
-			return false;
-		}
-
-		else if (g.length > 12) {
-			alert("Phone can not have more than 12 digits");
-			return false;
-		}
 		
-		var counter = 0;
-		if (q1) {
+	 	var counter = 0;
+	 	if (q1) {
 			if (a1 == "" || a1.length == 0 || a1 == null) {
 				alert("Q1 must have an answer!");
 				return false;
@@ -197,6 +163,25 @@ response.setDateHeader( "Expires", 0 );
 			alert("You have to select at least three questions");
 			return false;
 		}
+		<%}%>
+
+		var d = document.myform.newpassword.value;
+		var p = document.myform.reenter_newpassword.value;
+
+		var passw = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,20}$/;
+		if (!d.match(passw)) {
+			alert("Password should have 6 to 20 characters in which at least one numeric digit, one uppercase and one lowercase letter");
+			return false;
+		}
+
+	 if (p != d) {
+			alert("Password and Re-entered password should be same");
+			return false;
+		} else if (p.length > 20) {
+			alert("Password can not have more than 20 characters");
+			return false;
+		}
+		
 	};
 </script>
 
@@ -218,47 +203,36 @@ response.setDateHeader( "Expires", 0 );
     <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
 </head>
-<body >
-
+<body onpageshow="validateSession()">
+	<jsp:include page="header.jsp"></jsp:include>
 	<div class="container"></div>
 	<h1>
-		<center>USER REGISTRATION FORM</center>
+		<center>CHANGE PASSWORD FORM</center>
 	</h1>
 	<br>
 	<br>
 	<div class="userform">
-		<form method="POST" name="myform" action="${contextPath}/adduser"
-			onsubmit="return validate();" class="form-signin">
+		<form method="POST" name="myform" action="${contextPath}/changepassword" onsubmit="return validate();" class="form-signin">
 			<fieldset>
 				<span>${message}</span> <span>${message1}</span>
 				<h2>
 					<legend>
-						<strong>User information:</strong>
+						<strong>Enter your Password details: </strong>
 					</legend>
 				</h2>
-				<strong>First name:</strong><br> <input type="text"
-					name="firstname" required> <br>
-				<br> <strong>Last name:</strong><br> <input type="text"
-					name="lastname" required><br>
-				<br> <strong>User name:</strong><br> <input type="text"
-					name="username" required><br> <br> <strong>Password:</strong><br>
-				<input type="password" name="password" required><br> <br>
+				<strong>Old Password:</strong><br> <input type="password"
+					name="password" required> <br>
+					
+				<br> <strong>New Password:</strong><br> <input type="password"
+					name="newpassword" required><br>
+					
+				<br> <strong>Confirm Password:</strong><br> <input type="password"
+					name="reenter_newpassword" required><br> <br> 
 
-				<strong>Re-enter Password:</strong><br> <input type="password"
-					name="password2" required><br> <br> <strong>E-mail:</strong><br>
-				<input type="text" name="Email" required><br> <br>
-				<strong>Address:</strong><br> <input type="text" name="Address"
-					required><br> <br> <strong>Phone:</strong><br>
-				<input type="number" name="Phone" required><br> <br>
-
-				<strong>Roles:</strong><br> <select name="Role">
-					<option value="4">Individual User</option>
-					<option value="5">Merchant</option>
-
-
-
-
-				</select> <br> <br> <strong>Type 3 Security Questions and
+				<%	 
+					if(!test){
+				%>
+				<br> <br> <strong>Type 3 Security Questions and
 					Answers:</strong><br>
 				<br> <input type="checkbox" name="c1" value="1"
 					onchange="valueChanged1(this)"> What was your childhood nickname? <input type="text"
@@ -266,7 +240,7 @@ response.setDateHeader( "Expires", 0 );
 
 				<input type="checkbox" name="c2" value="2"
 					onchange="valueChanged2(this)">What is the name of your favorite childhood friend? <input type="text"
-					name="Q2" style="visibility: hidden"d><br> <br>
+					name="Q2" style="visibility: hidden"><br> <br>
 
 				<input type="checkbox" name="c3" value="3"
 					onchange="valueChanged3(this)">What school did you attend for sixth grade? <input type="text"
@@ -283,18 +257,12 @@ response.setDateHeader( "Expires", 0 );
 				<input type="checkbox" name="c6" value="6"
 					onchange="valueChanged6(this)">What was the name of the hospital where you were born? <input type="text"
 					name="Q6" style="visibility: hidden">
-
-
-				<!--  <strong>Question 1:</strong><input type="text" name="Question1"><br>
- <strong>Answer 1:</strong><input type="text" name="Answer1"><br><br>
- <strong>Question 2:</strong><input type="text" name="Question2"><br>
- <strong>Answer 2:</strong><input type="text" name="Answer2"><br><br>
- <strong>Question 3:</strong><input type="text" name="Question3"><br>
- <strong>Answer 3:</strong><input type="text" name="Answer3"><br><br> -->
-
-
-				<br> <br>
-				<br>
+				<%}
+				}catch(Exception e){
+					response.sendRedirect("error.jsp");
+					return;
+				}
+				%>
 				<button class="button">
 					<b>Submit</b>
 				</button>

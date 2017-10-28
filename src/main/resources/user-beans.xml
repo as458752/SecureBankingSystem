@@ -32,10 +32,10 @@
 		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.2.xsd">
 
 
-    <context:component-scan base-package="com.Group2.banking" />
+    <context:component-scan base-package="com.group2.banking" />
     <context:annotation-config />
-    <bean id="UserService" class="com.Group2.banking.service.UserServiceImpl" />
-    <bean id="AddUserService" class="com.Group2.banking.service.AddUserServiceImpl" />
+    <bean id="UserDefinedJDBCTemplate" class="com.group2.banking.service.UserDefinedJDBCImpl" />
+    <bean id="UserService" class="com.group2.banking.service.UserServiceImpl" />
     <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
         <property name="dataSource" ref="datasource" />
     </bean>
