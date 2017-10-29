@@ -19,6 +19,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.group2.banking.model.*;
+import java.util.Arrays;
+import java.util.List;
+import org.springframework.web.servlet.view.RedirectView;
 
 @Controller
 public class BaseController {
@@ -478,9 +481,11 @@ public class BaseController {
 	
 	@RequestMapping(value = "/TransactPage", method = RequestMethod.GET)
 	public ModelAndView transactPage(HttpServletRequest request, HttpServletResponse response) {
-		String account_id = request.getParameter("Transact");
 		ModelAndView mav = null;
 		try {
+                    String user_role = SessionManagement.check(request, "user_role");
+                    if(user_role.equals("4") || user_role.equals("5")){
+                        String account_id = request.getParameter("Transact");
 			if(account_id==null || account_id.equals("") || account_id.equals("null")) {
 				mav = new ModelAndView("AuthError");
 				return mav;
@@ -488,6 +493,21 @@ public class BaseController {
 			SessionManagement.update(request, "account_id", account_id);
 			mav = new ModelAndView("Transaction");
 			return mav;
+                    }
+                    else
+                    {
+                        mav = new ModelAndView("Account");
+                        String new_limit = request.getParameter("limit");
+                        String ids = request.getParameter("ids");
+                        List<String> idsList = Arrays.asList(ids.split(","));
+                        String user_id = idsList.get(0);
+                        String acc_id = idsList.get(1);
+                        String query = "update bank.credit_card set credit_limit = " + new_limit + " where account_id = " + acc_id;
+                        Statement st = (Statement)DBConnector.getConnection().createStatement();
+                        st.executeUpdate(query);
+                        mav.setView(new RedirectView("Account.jsp?id=" + user_id, true));
+                        return mav;
+                    }
 		}
 		catch(Exception e) {
 			mav = new ModelAndView("error");

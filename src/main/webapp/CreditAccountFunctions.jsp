@@ -71,14 +71,15 @@ function validateSession(){
 	   		response.sendRedirect("AuthError.jsp");
 			return;
 	   	}
-	   	int amountLeft = 1500-creditAcc.getInt(3);
+                int creditLimit = cardDet.getInt(4);
+	   	int amountLeft = creditLimit-creditAcc.getInt(3);
 	%>
         <br>
         <form method="GET" action="${contextPath}/makeCreditCardPayment" style="width: 300px; margin: 0 auto;" class="form-signin">
         <div class="form-group ${error != null ? 'has-error' : ''}">
             <h4 class="form-heading text-center">SETTLE CREDIT CARD BALANCE</h4>
             <strong>Account No : <%=creditAcc.getInt(1)%></strong><br>
-            <strong>Credit Limit : 1500</strong><br>
+            <strong>Credit Limit : <%=creditLimit%></strong><br>
             <strong>Credit Left : <%=amountLeft%></strong><br><br><br>
             <strong>Choose Your Debit Account : </strong>
             <select name="AccountNo">

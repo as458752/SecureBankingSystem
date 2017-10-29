@@ -42,7 +42,6 @@ function validateSession(){
 			response.sendRedirect("login.jsp");
 			return;
 		}
-		
 		ResultSet rs = DBConnector.getQueryResult("select * from users where user_id="+request.getParameter("id"));
 		if(!rs.next()){
 			response.sendRedirect("AuthError.jsp");
@@ -124,7 +123,7 @@ function CreateAccount(id,id2){
 <form method="get" name="form" action="${contextPath}/TransactPage">
 <table border="1">
 <%if(!SessionManagement.check(request, "user_role").equals("4") && !SessionManagement.check(request,"user_role").equals("5")){ %>
-<tr><th width="15">Account ID</th><th>Amount</th><th>Account Type</th><th>Delete</th>
+<tr><th width="15">Account ID</th><th>Amount</th><th>Account Type</th><th>Credit Limit</th><th>New Limit</th><th>Change Limit</th><th>Delete</th>
 <%}else{ %>
 <tr><th width="15">Account ID</th><th>Amount</th><th>Account Type</th><th>Perform Transactions</th>
 <%} %>
@@ -141,7 +140,7 @@ String password="abhisana@1993";
 PreparedStatement st;
 Class.forName(driver).newInstance();
 con = DriverManager.getConnection(url+db,userName,password);
-String query = "select account_id,amount,type_id from account where user_id=? and account_status=?";
+String query = "select account.account_id,account.amount,account_type.account_desc from account inner join account_type where account.type_id = account_type.type_id and user_id=? and account_status=?";
 st = con.prepareStatement(query);
 st.setInt(1,no);
 st.setInt(2,1);
@@ -153,10 +152,10 @@ Boolean isAccountPresent = false, isCreditAccountPresent = false;
 %>
 <%
 while(rs.next()){
-	if(!isAccountPresent && rs.getInt(3)!=3){
+	if(!isAccountPresent && !rs.getString(3).equals("Credit")){
 		isAccountPresent = true;
 	}
-	if(rs.getInt(3)==3){
+	if(rs.getString(3).equals("Credit")){
 		isCreditAccountPresent = true;
 		if(SessionManagement.check(request, "user_role").equals("4") || SessionManagement.check(request, "user_role").equals("5")){
 			continue;
@@ -166,16 +165,34 @@ while(rs.next()){
 <tr><td><%=rs.getString(1)%></td>
 <td><%=rs.getString(2)%></td>
 <td><%=rs.getString(3)%></td>
+<%if(rs.getString(3).equals("Credit")){ 
+query = "select credit_limit from credit_card where account_id=?";
+st = con.prepareStatement(query);
+st.setInt(1, rs.getInt(1));
+ResultSet rs1 = null;
+synchronized(MutexLock.getAccountsTableMutex()){
+	rs1 = st.executeQuery();
+}
+rs1.next();
+%>
+<td><%=rs1.getString(1)%></td>
+<td> <input name="limit" type="text" class="form-control"/></td>
+<td><button class="btn btn-lg btn-primary btn-block" type="submit" name="ids" value=<%=(id + "," + rs.getString(1))%> >Change Limit</button></td>
+<%
+}
+else{
+%>
+<td></td>
+<td></td>
+<td></td>
+<%}%>
 <%if(!SessionManagement.check(request, "user_role").equals("4") && !SessionManagement.check(request,"user_role").equals("5")){ %>
 <td><input type="button" name="delete" value="Delete" style="background-color:green;font-weight:bold;color:white;" onclick="deleteAccount(<%=rs.getString(1)%>);" ></td>
 <%}else{ %>
 <td><input type="submit" name="Transact" class="btn btn-lg btn-primary btn-block" value="<%=rs.getString(1)%>"></td>
-<%} %>
+<% } %>
 </tr>
-<%
-}
-
-%>
+<% } %>
 </table>
 
 <br>

@@ -53,12 +53,12 @@ function AccountDetails(id) {
 <div class="container">
   
 </div>
-<h1><center>LIST OF EXTERNAL USERS</center></h1>
+<h1><center>MY DETAILS</center></h1>
 <br>
 <br>
 <form method="post" name="form">
 <table border="1">
-<tr><th width="15">User ID</th><th>First Name</th><th>Lastname</th><th>Address</th><th>Phone</th><th>Edit</th><th>Account</th></tr>
+<tr><th width="15">User ID</th><th>User Name</th><th>First Name</th><th>Last Name</th><th>Email</th><th>Address</th><th>Phone</th><th>Role</th><th>Edit</th></tr>
 <%
 Connection con = null;
 String url = "jdbc:mysql://localhost:3306/";
@@ -67,8 +67,53 @@ String driver = "com.mysql.jdbc.Driver";
 String userName ="root";
 String password="abhisana@1993";
 
-int sumcount=0;
 Statement st;
+try{
+Class.forName(driver).newInstance();
+con = DriverManager.getConnection(url+db,userName,password);
+String query = "select * from users where user_status=1 and user_id="+SessionManagement.check(request, "user_id");; 
+st = con.createStatement();
+
+
+
+ResultSet rs=null;
+synchronized(MutexLock.getUsersTableMutex())
+{
+rs = st.executeQuery(query);
+}
+
+%>
+<%
+while(rs.next()){
+%>
+<tr><td><%=rs.getString(1)%></td>
+<td><%=rs.getString(2)%></td>
+<td><%=rs.getString(4)%></td>
+<td><%=rs.getString(5)%></td>
+<td><%=rs.getString(6)%></td>
+<td><%=rs.getString(7)%></td>
+<td><%=rs.getString(8)%></td>
+<td><%=rs.getString(9)%></td>
+<td><input type="button" name="edit" value="Edit" style="background-color:green;font-weight:bold;color:white;" onclick="editRecord(<%=rs.getString(1)%>);" ></td>
+</tr>
+<%
+}
+%>
+<%
+}
+catch(Exception e){
+	response.sendRedirect("error.jsp");
+}
+%>
+</table><br><br>
+<h1><center>LIST OF EXTERNAL USERS</center></h1>
+<br>
+<br>
+<form method="post" name="form">
+<table border="1">
+<tr><th width="15">User ID</th><th>First Name</th><th>Lastname</th><th>Address</th><th>Phone</th><th>Edit</th><th>Account</th></tr>
+<%
+int sumcount=0;
 try{
 Class.forName(driver).newInstance();
 con = DriverManager.getConnection(url+db,userName,password);
@@ -107,7 +152,7 @@ response.sendRedirect("error.jsp");
 <br>
 <h1><center>LIST OF INTERNAL USERS</center></h1>
 <table border="1">
-<tr><th width="15">User ID</th><th>First Name</th><th>Lastname</th><th>Address</th><th>Phone</th><th>Edit</th><th>Account</th></tr>
+<tr><th width="15">User ID</th><th>First Name</th><th>Last Name</th><th>Address</th><th>Phone</th><th>Edit</th></tr>
 <%
 try{
 Class.forName(driver).newInstance();
