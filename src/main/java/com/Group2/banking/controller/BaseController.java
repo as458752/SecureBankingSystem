@@ -113,6 +113,9 @@ public class BaseController {
 			}
 			mav = new ModelAndView(nextPage);
             SessionManagement.addCookie(request, response, GetHash.encrypt(user_id));
+            String query = "update bank.users set NO_OF_ATTEMPTS = 0 where user_id = " + user_id;
+                Statement st = (Statement)DBConnector.getConnection().createStatement();
+                st.executeUpdate(query);
             return mav;
 		}
 		
@@ -198,6 +201,7 @@ public class BaseController {
 	public ModelAndView loginProcess(HttpServletRequest request, HttpServletResponse response,
 			@ModelAttribute("login") Login login) {
 		try {
+                    request.getSession().invalidate();
                     String s = request.getParameter("g-recaptcha-response");
                     if(!CaptchaValidation.verify(s))
                     {
@@ -205,7 +209,6 @@ public class BaseController {
 			mav.addObject("error", "Please check I'm not a robot button!");
 			return mav;
                     }
-                    request.getSession().invalidate();
                     System.out.println("Inside login");
                     ModelAndView mav = new ModelAndView("otp");
                     User user = userService.validateUser(login);
@@ -224,6 +227,9 @@ public class BaseController {
             }
             if(SessionManagement.checkCookie(request, GetHash.encrypt(user_id)))
             {
+                String query = "update bank.users set NO_OF_ATTEMPTS = 0 where user_id = " + user_id;
+                Statement st = (Statement)DBConnector.getConnection().createStatement();
+                st.executeUpdate(query);
                 mav = new ModelAndView("welcome");
                 return mav;
             }

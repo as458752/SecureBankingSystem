@@ -155,15 +155,15 @@ response.sendRedirect("error.jsp");
 <tr><th width="15">User ID</th><th>Type</th><th>Approve</th><th>Decline</th></tr>
 <%
 try{
-ResultSet rs = DBConnector.getQueryResult("select account.user_id, account_type.account_desc from account inner join account_type where account.type_id = account_type.type_id and account_status=2");
+ResultSet rs = DBConnector.getQueryResult("select account.user_id, account_type.account_desc, account.account_id from account inner join account_type where account.type_id = account_type.type_id and account_status=2");
 %>
 <%
 while(rs.next()){
 %>
 <tr><td><%=rs.getString(1)%></td>
 <td><%=rs.getString(2)%></td>
-<td><input type="button" name="Approve" value="Approve" style="background-color:green;font-weight:bold;color:white;" onclick="ApproveAccount(<%=rs.getString(1)%>);" ></td>
-<td><input type="button" name="Decline" value="Decline" style="background-color:blue;font-weight:bold;color:white;" onclick="DeclineAccount(<%=rs.getString(1)%>);" ></td>
+<td><input type="button" name="Approve" value="Approve" style="background-color:green;font-weight:bold;color:white;" onclick="ApproveAccount(<%=rs.getString(3)%>);" ></td>
+<td><input type="button" name="Decline" value="Decline" style="background-color:blue;font-weight:bold;color:white;" onclick="DeclineAccount(<%=rs.getString(3)%>);" ></td>
 </tr>
 <%
 }

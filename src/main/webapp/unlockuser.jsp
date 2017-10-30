@@ -52,14 +52,13 @@ int no=Integer.parseInt(id);
 try {
 Class.forName("com.mysql.jdbc.Driver").newInstance();
 Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/bank", "root", "abhisana@1993");
-String query = "";
+ResultSet rs = null;
 synchronized(MutexLock.getUsersTableMutex())
 {
-	query = "select * from users where user_id=?";
+        PreparedStatement pStatement = conn.prepareStatement("select * from users where user_id=?");
+        pStatement.setInt(1, no);
+        rs = pStatement.executeQuery();
 }
-PreparedStatement pStatement = conn.prepareStatement(query);
-pStatement.setInt(1, no);
-ResultSet rs = pStatement.executeQuery(query);
 while(rs.next()){
 %>
 <fieldset>
@@ -90,7 +89,9 @@ while(rs.next()){
 <%
 }
 }
-catch(Exception e){ response.sendRedirect("error.jsp"); }
+catch(Exception e){ 
+    String s = e.getMessage();
+    response.sendRedirect("error.jsp"); }
 %>
 <%
 try{

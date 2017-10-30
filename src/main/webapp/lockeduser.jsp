@@ -29,7 +29,7 @@ function validateSession(){
 }
 
 function temp(id) {
-	alert("hello");
+	//alert("hello");
     var f=document.myform;
     f.method="post";
     f.action='unlockuser.jsp?id='+id;

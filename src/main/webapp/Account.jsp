@@ -165,7 +165,7 @@ while(rs.next()){
 <tr><td><%=rs.getString(1)%></td>
 <td><%=rs.getString(2)%></td>
 <td><%=rs.getString(3)%></td>
-<%if(rs.getString(3).equals("Credit")){ 
+<%if(rs.getString(3).equals("Credit")){
 query = "select credit_limit from credit_card where account_id=?";
 st = con.prepareStatement(query);
 st.setInt(1, rs.getInt(1));
@@ -179,13 +179,13 @@ rs1.next();
 <td> <input name="limit" type="text" class="form-control"/></td>
 <td><button class="btn btn-lg btn-primary btn-block" type="submit" name="ids" value=<%=(id + "," + rs.getString(1))%> >Change Limit</button></td>
 <%
-}
-else{
+}else{
+if(!SessionManagement.check(request, "user_role").equals("4") && !SessionManagement.check(request, "user_role").equals("5")){
 %>
 <td></td>
 <td></td>
 <td></td>
-<%}%>
+<%}}%>
 <%if(!SessionManagement.check(request, "user_role").equals("4") && !SessionManagement.check(request,"user_role").equals("5")){ %>
 <td><input type="button" name="delete" value="Delete" style="background-color:green;font-weight:bold;color:white;" onclick="deleteAccount(<%=rs.getString(1)%>);" ></td>
 <%}else{ %>
