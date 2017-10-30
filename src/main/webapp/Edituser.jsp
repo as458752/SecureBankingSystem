@@ -73,9 +73,9 @@
              alert("Lastname can not have more than 20 characters");
              return false;
          } 
-         else if(f.length>20)
+         else if(f.length>40)
          {  
-             alert("Address can not have more than  20 characters");
+             alert("Address can not have more than 40 characters");
              return false;
          }
          
