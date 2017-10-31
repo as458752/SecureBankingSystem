@@ -42,7 +42,13 @@ function validateSession(){
 			response.sendRedirect("login.jsp");
 			return;
 		}
-		ResultSet rs = DBConnector.getQueryResult("select * from users where user_id="+request.getParameter("id"));
+		//ResultSet rs = DBConnector.getQueryResult("select * from users where user_id="+request.getParameter("id"));
+                PreparedStatement st1 = DBConnector.getConnection().prepareStatement("select * from users where user_id=?");
+                st1.setInt(1,Integer.parseInt(request.getParameter("id")));
+                ResultSet rs = null;
+                synchronized(MutexLock.getUsersTableMutex()){
+                    rs = st1.executeQuery();
+                }
 		if(!rs.next()){
 			response.sendRedirect("AuthError.jsp");
 			return;			

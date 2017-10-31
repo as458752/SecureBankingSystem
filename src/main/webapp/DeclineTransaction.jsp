@@ -23,6 +23,11 @@
 		
 		int user_id = Integer.parseInt(SessionManagement.check(request,"user_id"));
 		int role = Integer.parseInt(SessionManagement.check(request,"user_role"));
+                
+                if(role==1){
+                    response.sendRedirect("AuthError.jsp");
+                    return;
+                }
 		
 		String id = request.getParameter("id");
 		String id1 = request.getParameter("id1");
@@ -62,6 +67,16 @@
 				return;	
 			}
 		}
+                
+                if(accountFrom!=null && !accountFrom.equals("null") && !accountFrom.equals("NULL") && !accountFrom.equals("") &&!DBConnector.getQueryResult("select * from account where account_id="+accountFrom).next()){
+                    response.sendRedirect("AuthError.jsp");
+                    return;
+                }
+                
+                if(accountTo!=null && !accountTo.equals("") && !accountTo.equals("null") && !accountTo.equals("NULL") && !DBConnector.getQueryResult("select * from account where account_id="+accountTo).next()){
+                    response.sendRedirect("AuthError.jsp");
+                    return;
+                }
 		
 		if(role==1 || role==2 || role==3){
 			if(id1!=null && !id1.equals("") && !id1.equals("null") && !id1.equals("NULL")){

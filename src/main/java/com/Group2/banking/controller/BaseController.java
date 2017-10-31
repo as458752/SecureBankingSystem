@@ -73,7 +73,11 @@ public class BaseController {
 			mav.addObject("OTPMessage","OTP doesn't match. Please try again!");
 			return mav;
 		}
-		if(SessionManagement.check(request,"password")!=null && !SessionManagement.check(request,"password").equals("") && !SessionManagement.check(request,"password").equals("null")){
+		if(SessionManagement.check(request,"From_Transaction")!=null && !SessionManagement.check(request,"From_Transaction").equals("") && !SessionManagement.check(request,"From_Transaction").equals("null") && !SessionManagement.check(request,"From_Transaction").equals("NULL") && SessionManagement.check(request,"From_Transaction").equals("yes")){
+                    mav = new ModelAndView(nextPage);
+                    return mav;
+                }
+                else if(SessionManagement.check(request,"password")!=null && !SessionManagement.check(request,"password").equals("") && !SessionManagement.check(request,"password").equals("null")){
 			User user = new User();
 			user.setPassword(SessionManagement.check(request, "password"));
 			user.setNewpassword(SessionManagement.check(request, "new_password"));
@@ -497,8 +501,21 @@ public class BaseController {
 				return mav;
 			}
 			SessionManagement.update(request, "account_id", account_id);
-			mav = new ModelAndView("Transaction");
-			return mav;
+			//mav = new ModelAndView("Transaction");
+			
+                        SessionManagement.update(request, "From_Transaction", "yes");
+                        EmailOTPSender sender = EmailOTPSender.getEmailOTPSender();
+			String otp = sender.generateOTP();
+			synchronized(MutexLock.getUsersTableMutex())
+			{
+				sender.sendMail("GoSwiss OTP", "Your OTP for logging in is = "+otp,(String) template.getJdbcTemplate().queryForList("select * from users where user_id='"+SessionManagement.check(request,"user_id")+"'").get(0).get("email"));
+			}
+			//Updating session..
+                        mav = new ModelAndView("otp");
+                        SessionManagement.update(request, "nextPage", "Transaction");
+			SessionManagement.update(request, "OTP", otp);
+			SessionManagement.update(request, "OTP_TimeStamp", ((Long)System.currentTimeMillis()).toString());
+                        return mav;
                     }
                     else
                     {
@@ -572,7 +589,14 @@ public class BaseController {
         {
             ModelAndView mav = null;
 	    mav = new ModelAndView("Transaction");
-            int amount = Integer.parseInt(request.getParameter("amount"));
+            int amount = 0;
+            try{
+                amount = Integer.parseInt(request.getParameter("amount"));
+            }catch(NumberFormatException ne)
+            {
+                mav.addObject("error","Amount is invalid!");
+                return mav;
+            }
             String receiver = request.getParameter("receiver");
             int account_id = Integer.parseInt(SessionManagement.check(request,"account_id"));
             int user_id = Integer.parseInt(SessionManagement.check(request,"user_id"));
@@ -581,8 +605,22 @@ public class BaseController {
             }
             else if (request.getParameter("way").equals("account"))
             {
-                int receiver_id = Integer.parseInt(receiver);
-                ResultSet rs = DBConnector.getQueryResult("select * from account where account_id="+receiver_id);
+                int receiver_id;
+                try{
+                    receiver_id = Integer.parseInt(receiver);
+                }catch(NumberFormatException ne)
+                {
+                    mav.addObject("error","Receiver ID is invalid!");
+                    return mav;
+                }
+                //ResultSet rs = DBConnector.getQueryResult("select * from account where account_id="+receiver_id);
+                PreparedStatement st1 = DBConnector.getConnection().prepareStatement("select * from account where account_id=?");
+                st1.setInt(1,receiver_id);
+                ResultSet rs = null;
+                synchronized(MutexLock.getAccountsTableMutex()){
+                    rs = st1.executeQuery();
+                }
+                
                 if(!rs.next())
                 {
                     mav.addObject("message1", "The account number does not exist!");
@@ -599,7 +637,13 @@ public class BaseController {
             }
             else if (request.getParameter("way").equals("email"))
             {
-                ResultSet rs = DBConnector.getQueryResult("select * from users where email like '%" + receiver + "%'");
+                //ResultSet rs = DBConnector.getQueryResult("select * from users where email like '%" + receiver + "%'");
+                PreparedStatement st1 = DBConnector.getConnection().prepareStatement("select * from users where email=?");
+                st1.setString(1,receiver);
+                ResultSet rs = null;
+                synchronized(MutexLock.getUsersTableMutex()){
+                    rs = st1.executeQuery();
+                }
                 if(!rs.next())
                 {
                     mav.addObject("message1", "The email address does not exist!");

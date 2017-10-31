@@ -45,7 +45,15 @@ function validateSession(){
 				response.sendRedirect("AuthError.jsp");
 				return;
 			}
-			ResultSet rs = DBConnector.getQueryResult("select * from edituseraccountapprovals where owner_id="+id1+" and user_id="+id);
+			//ResultSet rs = DBConnector.getQueryResult("select * from edituseraccountapprovals where owner_id="+id1+" and user_id="+id);
+                        PreparedStatement st1 = DBConnector.getConnection().prepareStatement("select * from edituseraccountapprovals where owner_id=? and user_id=?");
+                        st1.setInt(1,Integer.parseInt(id1));
+                        st1.setInt(2,Integer.parseInt(id));
+                        ResultSet rs = null;
+                        synchronized(MutexLock.getEdituseraccountapprovals()){
+                            rs = st1.executeQuery();
+                        }
+                        
 			if(rs.next()){
 				if(rs.getInt(3)!=2){
 					response.sendRedirect("AuthError.jsp");

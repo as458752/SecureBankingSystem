@@ -177,6 +177,7 @@ response.sendRedirect("error.jsp");
 %>
 <%} %>
 </table>
+<%if(!SessionManagement.check(request,"user_role").equals("1")){%>
 <h1><center>PENDING TRANSACTIONS</center></h1>
 <table border="1">
 <tr><th width="15">Transaction ID</th><th>Type</th><th>From</th><th>To</th><th>Amount</th><th>Select Account</th><th>Approve</th><th>Decline</th></tr>
@@ -192,8 +193,15 @@ if((SessionManagement.check(request,"user_role").equals("4") || SessionManagemen
 if((SessionManagement.check(request,"user_role").equals("1") || SessionManagement.check(request,"user_role").equals("2") || SessionManagement.check(request,"user_role").equals("3")) && rs.getInt(7)!=3 && rs.getInt(7)!=8 && rs.getInt(7)!=9){
 	continue;
 }
-ResultSet rs2 = DBConnector.getQueryResult("select * from account where account_id="+rs.getString(3));
-rs2.next();
+ResultSet rs2 = DBConnector.getQueryResult("select * from account where account_id="+rs.getString(2));
+if(! rs2.next() && rs.getString(2)!=null && !rs.getString(2).equals("") && !rs.getString(2).equals("null") && !rs.getString(2).equals("NULL")){
+   continue;
+}
+
+rs2 = DBConnector.getQueryResult("select * from account where account_id="+rs.getString(3));
+if(! rs2.next() && rs.getString(3)!=null && !rs.getString(3).equals("") && !rs.getString(3).equals("null") && !rs.getString(3).equals("NULL")){
+   continue;
+}
 if((SessionManagement.check(request,"user_role").equals("4") || SessionManagement.check(request,"user_role").equals("5")) && rs.getString(3)!=null && !rs.getString(3).equals("null") && !rs.getString(3).equals("") && !rs.getString(3).equals("NULL") && rs.getInt(7)==2 && rs2.getInt(2)!=Integer.parseInt(SessionManagement.check(request,"user_id"))){
 	continue;
 }
@@ -239,6 +247,7 @@ response.sendRedirect("error.jsp");
 }
 %>
 </table>
+<%}%>
 </form>
 </body>
 </html>

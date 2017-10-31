@@ -40,7 +40,7 @@ CREATE TABLE bank.users
                               FOREIGN KEY (Role_id) REFERENCES bank.roles(role_id)
                  ) ENGINE=INNODB;
 
-insert into bank.users values(11348,'ap','288e818589f6a8846af619f44c2f39b11691ce57','ap','ap','406095865@qq.com','Tempe',44444444,1,0,1);
+insert into bank.users values(11348,'ap','288e818589f6a8846af619f44c2f39b11691ce57','ap','ap','raviabi9595@gmail.com','Tempe',44444444,1,0,1);
 ##  288e818589f6a8846af619f44c2f39b11691ce57   == "Zz123456"
 
 CREATE TABLE bank.sec_questions
