@@ -56,8 +56,7 @@ if(SessionManagement.check(request,"user_id").equals(id)){
 }
 int no=Integer.parseInt(id);
 try {
-Class.forName("com.mysql.jdbc.Driver").newInstance();
-Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/bank", "root", "abhisana@1993");
+Connection conn = DBConnector.getConnection();
 String query = "select * from users where user_id=?";
 
 
@@ -108,8 +107,7 @@ catch(Exception e){
 <%
 try{
 	
-           Class.forName("com.mysql.jdbc.Driver");
-           Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/bank", "root", "abhisana@1993");
+           Connection con = DBConnector.getConnection();
            String query0="SET SQL_SAFE_UPDATES = ?";
            String query1="delete from account where user_id=?";
            String query2="delete from user_ques_mapping  where user_id=?";

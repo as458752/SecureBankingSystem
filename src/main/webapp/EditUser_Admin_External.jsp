@@ -145,8 +145,7 @@ String id=request.getParameter("id");
 int no=Integer.parseInt(id);
 int sumcount=0;
 try {
-Class.forName("com.mysql.jdbc.Driver").newInstance();
-Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/bank", "root", "abhisana@1993");
+Connection conn = DBConnector.getConnection();
 String query = "select * from users where user_id=?";
 
 

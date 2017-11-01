@@ -209,6 +209,7 @@ response.setDateHeader( "Expires", 0 );
 
 <title>GoSwiss</title>
 
+<script src="https://www.google.com/recaptcha/api.js" async defer></script>
 <link href="<c:url value="/resources/css/bootstrap.min.css" />" rel="stylesheet">
 
 <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
@@ -293,6 +294,7 @@ response.setDateHeader( "Expires", 0 );
 
 
 				<br> <br>
+                                <div class="g-recaptcha" data-sitekey="6LeGATUUAAAAAIcGuQfnGpvGFD6CwFyPSwGZgpm3"></div>
 				<br>
 				<button class="button">
 					<b>Submit</b>

@@ -272,6 +272,13 @@ public class BaseController {
 			@ModelAttribute("adduser") User adduser) {
 		try
 		{
+                    String s = request.getParameter("g-recaptcha-response");
+                    if(!CaptchaValidation.verify(s))
+                    {
+                        ModelAndView mav = new ModelAndView("adduser");
+			mav.addObject("message", "Please check I'm not a robot button!");
+			return mav;
+                    }
 		System.out.println("Inside add user controller");
 		ModelAndView mav = null;
 	    String ans=userService.register(adduser);

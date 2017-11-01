@@ -130,14 +130,8 @@ String id=request.getParameter("id");
 int no=Integer.parseInt(id);
 try{
 Connection con = null;
-String url = "jdbc:mysql://localhost:3306/";
-String db = "bank";
-String driver = "com.mysql.jdbc.Driver";
-String userName ="root";
-String password="abhisana@1993";
 PreparedStatement st;
-Class.forName(driver).newInstance();
-con = DriverManager.getConnection(url+db,userName,password);
+con = DBConnector.getConnection();
 String query = "select user_id,account_id,amount,b.account_desc from account a,account_type b where a.type_id=b.type_id and account_id=?";
 st = con.prepareStatement(query);
 st.setInt(1, no);
@@ -169,8 +163,7 @@ catch(Exception e){
 <%
 try{
 	int no1=Integer.parseInt(id);
-           Class.forName("com.mysql.jdbc.Driver");
-           Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/bank", "root", "abhisana@1993");
+           Connection con = DBConnector.getConnection();
            PreparedStatement st=con.prepareStatement("SET SQL_SAFE_UPDATES = 0");
            int i=st.executeUpdate();
            

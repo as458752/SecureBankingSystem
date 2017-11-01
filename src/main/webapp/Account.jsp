@@ -138,14 +138,8 @@ String id=request.getParameter("id");
 int no=Integer.parseInt(id);
 try{
 Connection con = null;
-String url = "jdbc:mysql://localhost:3306/";
-String db = "bank";
-String driver = "com.mysql.jdbc.Driver";
-String userName ="root";
-String password="abhisana@1993";
 PreparedStatement st;
-Class.forName(driver).newInstance();
-con = DriverManager.getConnection(url+db,userName,password);
+con = DBConnector.getConnection();
 String query = "select account.account_id,account.amount,account_type.account_desc from account inner join account_type where account.type_id = account_type.type_id and user_id=? and account_status=?";
 st = con.prepareStatement(query);
 st.setInt(1,no);

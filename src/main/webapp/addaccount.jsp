@@ -109,8 +109,7 @@ int no=Integer.parseInt(id);
 String id2=request.getParameter("id2");
 int no1=Integer.parseInt(id2);
 try {
-Class.forName("com.mysql.jdbc.Driver").newInstance();
-Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/bank", "root", "abhisana@1993");
+Connection conn = DBConnector.getConnection();
 
      int status = 2; 
 	 if(SessionManagement.check(request, "user_role").equals("3") || SessionManagement.check(request, "user_role").equals("2")){
@@ -141,8 +140,7 @@ catch(Exception e){
 String id_display=request.getParameter("id");
 int no_display=Integer.parseInt(id);
 try {
-Class.forName("com.mysql.jdbc.Driver").newInstance();
-Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/bank", "root", "abhisana@1993");
+Connection conn = DBConnector.getConnection();
 
 
 String query =  "select * from account where user_id=? ORDER BY account_id DESC LIMIT 1";

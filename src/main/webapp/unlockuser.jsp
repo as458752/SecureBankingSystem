@@ -50,8 +50,7 @@ function validateSession(){
 String id=request.getParameter("id");
 int no=Integer.parseInt(id);
 try {
-Class.forName("com.mysql.jdbc.Driver").newInstance();
-Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/bank", "root", "abhisana@1993");
+Connection conn = DBConnector.getConnection();
 ResultSet rs = null;
 synchronized(MutexLock.getUsersTableMutex())
 {
@@ -96,8 +95,7 @@ catch(Exception e){
 <%
 try{
 	
-           Class.forName("com.mysql.jdbc.Driver");
-           Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/bank", "root", "abhisana@1993");
+           Connection con = DBConnector.getConnection();
            Statement st=con.createStatement();
            int i=st.executeUpdate("SET SQL_SAFE_UPDATES = 0");
            String query1 = "UPDATE users SET user_status=1 where user_id=?";

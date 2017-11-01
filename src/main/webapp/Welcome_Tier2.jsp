@@ -65,12 +65,10 @@ String url = "jdbc:mysql://localhost:3306/";
 String db = "bank";
 String driver = "com.mysql.jdbc.Driver";
 String userName ="root";
-String password="abhisana@1993";
 
 Statement st;
 try{
-Class.forName(driver).newInstance();
-con = DriverManager.getConnection(url+db,userName,password);
+con = DBConnector.getConnection();
 String query = "select * from users where user_status=1 and user_id="+SessionManagement.check(request, "user_id");; 
 st = con.createStatement();
 
@@ -115,8 +113,7 @@ catch(Exception e){
 <%
 int sumcount=0;
 try{
-Class.forName(driver).newInstance();
-con = DriverManager.getConnection(url+db,userName,password);
+con = DBConnector.getConnection();
 String query = "select * from users where user_status=1 and Role_id=4 OR Role_id=5";
 st = con.createStatement();
 // ResultSet rs = st.executeQuery(query);
@@ -155,8 +152,7 @@ response.sendRedirect("error.jsp");
 <tr><th width="15">User ID</th><th>First Name</th><th>Last Name</th><th>Address</th><th>Phone</th><th>Edit</th></tr>
 <%
 try{
-Class.forName(driver).newInstance();
-con = DriverManager.getConnection(url+db,userName,password);
+con = DBConnector.getConnection();
 String query = "select * from users where user_status=1 and Role_id=1";
 st = con.createStatement();
 ResultSet rs=null;

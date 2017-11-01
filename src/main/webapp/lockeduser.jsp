@@ -59,13 +59,11 @@ String url = "jdbc:mysql://localhost:3306/";
 String db = "bank";
 String driver = "com.mysql.jdbc.Driver";
 String userName ="root";
-String password="abhisana@1993";
 
 int sumcount=0;
 Statement st;
 try{
-Class.forName(driver).newInstance();
-con = DriverManager.getConnection(url+db,userName,password);
+con = DBConnector.getConnection();
 String query = "";
 synchronized(MutexLock.getUsersTableMutex())
 {
