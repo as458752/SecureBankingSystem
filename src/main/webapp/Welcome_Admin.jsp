@@ -1,3 +1,4 @@
+<%@page import="org.springframework.jdbc.support.rowset.SqlRowSet"%>
 <%@ page import="java.sql.*" %>
 <%@ page import="com.group2.banking.controller.*" %>
 <%@ page import="com.group2.banking.service.*" %>
@@ -80,15 +81,14 @@ int sumcount=0;
 Statement st;
 try{
 con = DBConnector.getConnection();
-String query = "select * from users where user_status=1 and user_id="+SessionManagement.check(request, "user_id");; 
+String query = "select * from users where user_status=1 and user_id=?"; 
 st = con.createStatement();
+SqlRowSet rs = null;
 
 
-
-ResultSet rs=null;
 synchronized(MutexLock.getUsersTableMutex())
 {
-rs = st.executeQuery(query);
+rs = DBConnector.execute(query, new Object[]{SessionManagement.check(request, "user_id")}, new int[]{Types.INTEGER});
 }
 %>
 <%
