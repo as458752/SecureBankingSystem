@@ -1,3 +1,4 @@
+<%@page import="org.springframework.jdbc.support.rowset.SqlRowSet"%>
 <%@page language="java"%>
 <%@page import="java.sql.*"%>
 <%@page import="java.lang.System"%>
@@ -56,18 +57,14 @@ if(SessionManagement.check(request,"user_id").equals(id)){
 }
 int no=Integer.parseInt(id);
 try {
-Connection conn = DBConnector.getConnection();
+//Connection conn = DBConnector.getConnection();
 String query = "select * from users where user_id=?";
 
 
-PreparedStatement preparedStatement = conn.prepareStatement(query);
-preparedStatement.setInt(1, no);
-ResultSet rs=null;
-synchronized(MutexLock.getUsersTableMutex())
-{
-rs = preparedStatement.executeQuery();
-}
-
+//PreparedStatement preparedStatement = conn.prepareStatement(query);
+//preparedStatement.setInt(1, no);
+//ResultSet rs=null;
+SqlRowSet rs = DBConnector.execute(query, new Object[]{no}, new int[]{Types.INTEGER});
 
 while(rs.next()){
 %>
@@ -113,35 +110,14 @@ try{
            String query2="delete from user_ques_mapping  where user_id=?";
            String query3="delete from users where user_id=?";
            
-           PreparedStatement preparedStatement = con.prepareStatement(query0);
-           preparedStatement.setInt(1, no);
-           ResultSet rs=null;
+           DBConnector.update(query0, new Object[]{0}, new int[]{Types.INTEGER});
            
-           preparedStatement.setInt(1, 0);
-           preparedStatement.executeUpdate();
+           DBConnector.update(query1, new Object[]{no}, new int[]{Types.INTEGER});
            
-           preparedStatement = con.prepareStatement(query1);
-           synchronized(MutexLock.getAccountsTableMutex())
-           {
-        	  
-        	   preparedStatement.setInt(1, no);
-        	  preparedStatement.executeUpdate();
-           }
+           DBConnector.update(query2, new Object[]{no}, new int[]{Types.INTEGER});
            
-           preparedStatement = con.prepareStatement(query2);
-           synchronized(MutexLock.getUserQuesMappingTableMutex())
-           {
-        	   preparedStatement.setInt(1, no);
-        	   preparedStatement.executeUpdate();
-           }
+           DBConnector.update(query3, new Object[]{no}, new int[]{Types.INTEGER});
            
-           preparedStatement = con.prepareStatement(query3);
-           synchronized(MutexLock.getUsersTableMutex())
-           {
-        	   preparedStatement.setInt(1, no);
-        	   preparedStatement.executeUpdate();
-           }
-          
 }
 catch (Exception e){
 	System.out.println(e);

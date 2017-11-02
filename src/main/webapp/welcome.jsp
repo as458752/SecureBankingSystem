@@ -1,6 +1,7 @@
 <%@ page import="java.sql.*" %>
 <%@page import="com.group2.banking.service.*" %>
 <%@page import="com.group2.banking.controller.*" %>
+<%@ page import="org.springframework.jdbc.support.rowset.SqlRowSet" %>
 <html>
 <head>
 <script>
@@ -28,9 +29,8 @@ function validateSession(){
 <%
    try{
 	int user_id = Integer.parseInt((String)SessionManagement.check(request,"user_id"));
-	ResultSet rs = DBConnector.getQueryResult("select * from users where user_id="+user_id);
-	String name = (String)DBConnector.getMatchedValuesFromResultSet(rs, "firstname").get(0);
- 
+        SqlRowSet rs = DBConnector.execute("select * from users where user_id=?", new Object[]{user_id}, new int[]{Types.INTEGER});rs.next();
+        String name = rs.getString(4);
 %>
 <body onpageshow="validateSession()">
 <jsp:include page="header.jsp"></jsp:include>

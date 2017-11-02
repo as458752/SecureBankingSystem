@@ -1,3 +1,4 @@
+<%@page import="org.springframework.jdbc.support.rowset.SqlRowSet"%>
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
     pageEncoding="ISO-8859-1"%>
     <%@ page import="java.sql.*" %>
@@ -46,13 +47,11 @@ function validateSession(){
 				return;
 			}
 			//ResultSet rs = DBConnector.getQueryResult("select * from edituseraccountapprovals where owner_id="+id1+" and user_id="+id);
-                        PreparedStatement st1 = DBConnector.getConnection().prepareStatement("select * from edituseraccountapprovals where owner_id=? and user_id=?");
-                        st1.setInt(1,Integer.parseInt(id1));
-                        st1.setInt(2,Integer.parseInt(id));
-                        ResultSet rs = null;
-                        synchronized(MutexLock.getEdituseraccountapprovals()){
-                            rs = st1.executeQuery();
-                        }
+                        //PreparedStatement st1 = DBConnector.getConnection().prepareStatement("select * from edituseraccountapprovals where owner_id=? and user_id=?");
+                        SqlRowSet rs = DBConnector.execute("select * from edituseraccountapprovals where owner_id=? and user_id=?", new Object[]{Integer.parseInt(id1), Integer.parseInt(id)}, new int[]{Types.INTEGER, Types.INTEGER});
+                        //st1.setInt(1,Integer.parseInt(id1));
+                        //st1.setInt(2,Integer.parseInt(id));
+                        //ResultSet rs = null;
                         
 			if(rs.next()){
 				if(rs.getInt(3)!=2){
@@ -72,19 +71,17 @@ function validateSession(){
 				}
 				
 				//Decline..
-				Connection con = DBConnector.getConnection();
+				//Connection con = DBConnector.getConnection();
 				if(SessionManagement.check(request,"user_role").equals("4") || SessionManagement.check(request,"user_role").equals("5")){
 					if(!id1.equals(SessionManagement.check(request, "user_id"))){
 						response.sendRedirect("AuthError.jsp");
 						return;
 					}
 				}
-				PreparedStatement st = con.prepareStatement("update edituseraccountapprovals set approval_status=3 where owner_id=? and user_id=?");
-				st.setInt(1,Integer.parseInt(id1));
-				st.setInt(2,Integer.parseInt(id));
-				synchronized(MutexLock.getEdituseraccountapprovals()){
-					st.executeUpdate();
-				}
+				//PreparedStatement st = con.prepareStatement("update edituseraccountapprovals set approval_status=3 where owner_id=? and user_id=?");
+				//st.setInt(1,Integer.parseInt(id1));
+				//st.setInt(2,Integer.parseInt(id));
+                                DBConnector.update("update edituseraccountapprovals set approval_status=3 where owner_id=? and user_id=?", new Object[]{Integer.parseInt(id1), Integer.parseInt(id)}, new int[]{Types.INTEGER, Types.INTEGER});
 			}
 			else{
 				System.out.println("temp 7");
@@ -98,13 +95,11 @@ function validateSession(){
 				return;
 			}
 			
-			Connection conn = DBConnector.getConnection();
-			PreparedStatement st = conn.prepareStatement("select * from account where account_id=?");
-			st.setInt(1, Integer.parseInt(id));
-			ResultSet rs = null;
-			synchronized(MutexLock.getAccountsTableMutex()){
-				rs = st.executeQuery();
-			}
+			//Connection conn = DBConnector.getConnection();
+			//PreparedStatement st = conn.prepareStatement("select * from account where account_id=?");
+			//st.setInt(1, Integer.parseInt(id));
+			//ResultSet rs = null;
+                        SqlRowSet rs = DBConnector.execute("select * from account where account_id=?", new Object[]{Integer.parseInt(id)}, new int[]{Types.INTEGER});
 			if(rs.next()){
 				if(rs.getInt(5)!=2){
 					response.sendRedirect("AuthError.jsp");
@@ -112,11 +107,9 @@ function validateSession(){
 				}
 				
 				//Decline..
-				st = conn.prepareStatement("update account set account_status=3 where account_id=?");
-				st.setInt(1,Integer.parseInt(id));
-				synchronized(MutexLock.getAccountsTableMutex()){
-					st.executeUpdate();
-				}
+				//st = conn.prepareStatement("update account set account_status=3 where account_id=?");
+				//st.setInt(1,Integer.parseInt(id));
+                                DBConnector.update("update account set account_status=3 where account_id=?", new Object[]{Integer.parseInt(id)}, new int[]{Types.INTEGER});
 			}
 			else{
 				response.sendRedirect("AuthError.jsp");

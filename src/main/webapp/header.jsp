@@ -6,6 +6,7 @@
 <%@page import="com.group2.banking.controller.*" %>
 <%@ page import="java.sql.*" %>
 <%@page import="com.group2.banking.service.*" %>
+<%@ page import="org.springframework.jdbc.support.rowset.SqlRowSet" %>
 
 <c:set var="contextPath" value="${pageContext.request.contextPath}"/>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
@@ -35,8 +36,8 @@
 	   response.setHeader( "Cache-Control", "no-cache" );
 	   response.setDateHeader( "Expires", 0 );
       		try{
-      		ResultSet rs = DBConnector.getQueryResult("select * from account where type_id=3 and account_status=1 and user_id="+SessionManagement.check(request,"user_id"));
-      		ResultSet rs1 = DBConnector.getQueryResult("select * from account where type_id<>3 and account_status=1 and user_id="+SessionManagement.check(request,"user_id"));
+                SqlRowSet rs = DBConnector.execute("select * from account where type_id=3 and account_status=1 and user_id=?", new Object[]{Integer.parseInt(SessionManagement.check(request,"user_id"))}, new int[]{Types.INTEGER});
+                SqlRowSet rs1 = DBConnector.execute("select * from account where type_id=3 and account_status=1 and user_id=?", new Object[]{Integer.parseInt(SessionManagement.check(request,"user_id"))}, new int[]{Types.INTEGER});
       %>
       <%if((SessionManagement.check(request, "user_role").equals("4") && rs.next()) || (SessionManagement.check(request, "user_role").equals("5") && rs1.next())){ %>
       <li><form action="${contextPath}/viewCreditFunctions"><input type="submit" value="Credit Functions" method="GET" class="navbar-brand"></form></li>

@@ -5,6 +5,7 @@
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
+<%@ page import="org.springframework.jdbc.support.rowset.SqlRowSet" %>
 
 <c:set var="contextPath" value="${pageContext.request.contextPath}"/>
 
@@ -46,13 +47,8 @@
     			response.sendRedirect("AuthError.jsp");
     			return;
     		}
-    		
-    		PreparedStatement st = DBConnector.getConnection().prepareStatement("select * from users where user_id=?");
-    		st.setInt(1,Integer.parseInt(request.getParameter("id")));
-    		ResultSet rs = null;
-    		synchronized(MutexLock.getUsersTableMutex()){
-    			rs = st.executeQuery();
-    		}
+
+    		SqlRowSet rs = DBConnector.execute("select * from users where user_id=?", new Object[]{Integer.parseInt(request.getParameter("id"))}, new int[]{Types.INTEGER});
     		
     		if(!rs.next()){
     			response.sendRedirect("AuthError.jsp");
@@ -145,17 +141,7 @@ String id=request.getParameter("id");
 int no=Integer.parseInt(id);
 int sumcount=0;
 try {
-Connection conn = DBConnector.getConnection();
-String query = "select * from users where user_id=?";
-
-
-PreparedStatement preparedStatement = conn.prepareStatement(query);
-preparedStatement.setInt(1, no);
-ResultSet rs=null;
-synchronized(MutexLock.getUsersTableMutex())
-{
-rs = preparedStatement.executeQuery();
-}
+SqlRowSet rs = DBConnector.execute("select * from users where user_id=?", new Object[]{no}, new int[]{Types.INTEGER});
 
 while(rs.next()){
 SessionManagement.update(request,"EdituserName",rs.getString(2));

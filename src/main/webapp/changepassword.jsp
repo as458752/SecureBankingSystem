@@ -1,3 +1,4 @@
+<%@page import="org.springframework.jdbc.support.rowset.SqlRowSet"%>
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form"%>
@@ -18,7 +19,8 @@ response.setHeader( "Cache-Control", "no-cache" );
 response.setDateHeader( "Expires", 0 );
 				try{
 					Boolean test = false;
-					ResultSet rs = DBConnector.getQueryResult("select * from user_ques_mapping where user_id="+SessionManagement.check(request,"user_id"));
+					//ResultSet rs = DBConnector.getQueryResult("select * from user_ques_mapping where user_id="+SessionManagement.check(request,"user_id"));
+                                        SqlRowSet rs = DBConnector.execute("select * from user_ques_mapping where user_id=?", new Object[]{Integer.parseInt(SessionManagement.check(request,"user_id"))}, new int[]{Types.INTEGER});
 					if(rs.next()){ test = true;}
 %>
 <script language="javascript">

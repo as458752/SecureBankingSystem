@@ -2,6 +2,7 @@
 <%@ page import="java.util.*" %>
 <%@ page import="com.group2.banking.controller.*" %>
 <%@ page import="com.group2.banking.service.*" %>
+<%@ page import="org.springframework.jdbc.support.rowset.SqlRowSet" %>
 <html>
 <head>
 <script language="javascript">
@@ -101,7 +102,7 @@ function DeclineTransaction(id){
 <tr><th width="15">Profile to View</th><th>Request Created By</th><th>Approve</th><th>Decline</th></tr>
 <%
 try{
-ResultSet rs = DBConnector.getQueryResult("select * from edituseraccountapprovals where owner_id="+SessionManagement.check(request,"user_id")+" and approval_stage=1 and approval_status=2");
+SqlRowSet rs = DBConnector.execute("select * from edituseraccountapprovals where owner_id=? and approval_stage=1 and approval_status=2", new Object[]{Integer.parseInt(SessionManagement.check(request,"user_id"))}, new int[]{Types.INTEGER});
 %>
 <%
 while(rs.next()){
@@ -128,7 +129,7 @@ response.sendRedirect("error.jsp");
 <tr><th width="15">Profile to View</th><th>Request Created By</th><th>Approve</th><th>Decline</th></tr>
 <%
 try{
-ResultSet rs = DBConnector.getQueryResult("select * from edituseraccountapprovals where approval_stage=2 and approval_status=2");
+SqlRowSet rs = DBConnector.execute("select * from edituseraccountapprovals where approval_stage=2 and approval_status=?", new Object[]{2}, new int[]{Types.INTEGER});
 %>
 <%
 while(rs.next()){
@@ -155,7 +156,7 @@ response.sendRedirect("error.jsp");
 <tr><th width="15">User ID</th><th>Type</th><th>Approve</th><th>Decline</th></tr>
 <%
 try{
-ResultSet rs = DBConnector.getQueryResult("select account.user_id, account_type.account_desc, account.account_id from account inner join account_type where account.type_id = account_type.type_id and account_status=2");
+SqlRowSet rs = DBConnector.execute("select account.user_id, account_type.account_desc, account.account_id from account inner join account_type where account.type_id = account_type.type_id and account_status=?", new Object[]{2}, new int[]{Types.INTEGER});
 %>
 <%
 while(rs.next()){
@@ -183,7 +184,7 @@ response.sendRedirect("error.jsp");
 <tr><th width="15">Transaction ID</th><th>Type</th><th>From</th><th>To</th><th>Amount</th><th>Select Account</th><th>Approve</th><th>Decline</th></tr>
 <%
 try{
-ResultSet rs = DBConnector.getQueryResult("select * from transactions");
+SqlRowSet rs = DBConnector.execute("select * from transactions where transaction_id<>?", new Object[]{-1}, new int[]{Types.INTEGER});
 %>
 <%
 while(rs.next()){
@@ -193,12 +194,12 @@ if((SessionManagement.check(request,"user_role").equals("4") || SessionManagemen
 if((SessionManagement.check(request,"user_role").equals("1") || SessionManagement.check(request,"user_role").equals("2") || SessionManagement.check(request,"user_role").equals("3")) && rs.getInt(7)!=3 && rs.getInt(7)!=8 && rs.getInt(7)!=9){
 	continue;
 }
-ResultSet rs2 = DBConnector.getQueryResult("select * from account where account_id="+rs.getString(2));
+SqlRowSet rs2 = DBConnector.execute("select * from account where account_id=?", new Object[]{rs.getInt(2)}, new int[]{Types.INTEGER});
 if(! rs2.next() && rs.getString(2)!=null && !rs.getString(2).equals("") && !rs.getString(2).equals("null") && !rs.getString(2).equals("NULL")){
    continue;
 }
 
-rs2 = DBConnector.getQueryResult("select * from account where account_id="+rs.getString(3));
+rs2 = DBConnector.execute("select * from account where account_id=?", new Object[]{rs.getInt(3)}, new int[]{Types.INTEGER});
 if(! rs2.next() && rs.getString(3)!=null && !rs.getString(3).equals("") && !rs.getString(3).equals("null") && !rs.getString(3).equals("NULL")){
    continue;
 }
@@ -225,13 +226,12 @@ if((SessionManagement.check(request,"user_role").equals("4") || SessionManagemen
 <td>
 <%
 	if((SessionManagement.check(request,"user_role").equals("4") || SessionManagement.check(request,"user_role").equals("5")) && rs.getInt(7)==1){
-		ResultSet rs1 = DBConnector.getQueryResult("select * from account where account_status=1 and type_id<>3 and user_id="+SessionManagement.check(request,"user_id"));
-		List<Object> accounts = DBConnector.getMatchedValuesFromResultSet(rs1, "account_id");
-		if(accounts.size()>0){
+		SqlRowSet rs1 = DBConnector.execute("select * from account where account_status=1 and type_id<>3 and user_id=?", new Object[]{Integer.parseInt(SessionManagement.check(request,"user_id"))}, new int[]{Types.INTEGER});
+		if(rs1.next()){
 			%><select id="<%=rs.getString(1)%>" name="Accounts"><%
-			for(int i=0;i<accounts.size();i++){%>
-				<option value="<%=accounts.get(i)%>"><%=accounts.get(i)%></option>
-			<%}%></select><%}}%>
+			do{%>
+				<option value="<%=rs1.getInt(1)%>"><%=rs1.getInt(1)%></option>
+			<%}while(rs1.next());%></select><%}}%>
 </td>
 <td><input type="button" name="Approve" value="Approve" style="background-color:green;font-weight:bold;color:white;" onclick="ApproveTransaction(<%=rs.getString(1)%>);" ></td>
 <td><input type="button" name="Decline" value="Decline" style="background-color:blue;font-weight:bold;color:white;" onclick="DeclineTransaction(<%=rs.getString(1)%>);" ></td>

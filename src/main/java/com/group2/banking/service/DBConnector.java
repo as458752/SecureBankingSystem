@@ -44,63 +44,31 @@ public class DBConnector {
     
     public static SqlRowSet execute(String sql,Object[] args,int[] argTypes)
     {
-        try{
-            return DBConnector.getJdbcTemplate().queryForRowSet(sql, args, argTypes);
-        }catch(Exception e)
-        {
-            return null;
+        synchronized(MutexLock.getLock()){
+            try{
+                return DBConnector.getJdbcTemplate().queryForRowSet(sql, args, argTypes);
+            }catch(Exception e)
+            {
+                e.printStackTrace();
+                return null;
+            }
         }
     }
     
-    public static void update(String sql,Object[] args,int[] argTypes)
+    public static int update(String sql,Object[] args,int[] argTypes)
     {
-        try{
-            DBConnector.getJdbcTemplate().update(sql, args, argTypes);
-        }catch(Exception e)
-        {
+        synchronized(MutexLock.getLock()){
+            int result = 0;
+            try{
+                result = DBConnector.getJdbcTemplate().update(sql, args, argTypes);
+            }catch(Exception e)
+            {
+                e.printStackTrace();
+                return 0;
+            }
+            finally{
+                return result;
+            }
         }
     }
-    
-    
-	private static Connection con = null;
-	public static Connection getConnection() {
-		try {
-			if(con==null) {
-				String url = "jdbc:mysql://localhost:3306/";
-				String db = "bank";
-				String driver = "com.mysql.jdbc.Driver";
-				String userName ="root";
-				String password="abhisana@1993";
-				Class.forName(driver).newInstance();
-				con = DriverManager.getConnection(url+db,userName,password);
-			}
-		}
-		catch(Exception e) {
-			System.out.println(e);
-		}
-		return con;
-	}
-	public synchronized static ResultSet getQueryResult(String sql) {
-		try {
-			Statement st = (Statement)DBConnector.getConnection().createStatement();
-			return st.executeQuery(sql);
-		}
-		catch(Exception e) {
-			System.out.println(e);
-		}
-		return null;
-	}
-	public static List<Object> getMatchedValuesFromResultSet(ResultSet rs, String column){
-		try {
-			List<Object> temp = new ArrayList<Object>();
-			while(rs.next()) {
-				temp.add(rs.getObject(column));
-			}
-			System.out.println(temp);
-			return temp;
-		}catch(Exception e) {
-			System.out.println(e);
-		}
-		return null;
-	}
 }

@@ -5,6 +5,7 @@
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
 <%@ page import="com.group2.banking.controller.*" %>
 <%@ page import="com.group2.banking.service.*" %>
+<%@ page import="org.springframework.jdbc.support.rowset.SqlRowSet" %> 
 
 <c:set var="contextPath" value="${pageContext.request.contextPath}"/>
 
@@ -50,14 +51,7 @@ function validateSession(){
 String id=request.getParameter("id");
 int no=Integer.parseInt(id);
 try {
-Connection conn = DBConnector.getConnection();
-ResultSet rs = null;
-synchronized(MutexLock.getUsersTableMutex())
-{
-        PreparedStatement pStatement = conn.prepareStatement("select * from users where user_id=?");
-        pStatement.setInt(1, no);
-        rs = pStatement.executeQuery();
-}
+SqlRowSet rs = DBConnector.execute("select * from users where user_id=?", new Object[]{no}, new int[]{Types.INTEGER});
 while(rs.next()){
 %>
 <fieldset>
@@ -94,28 +88,14 @@ catch(Exception e){
 %>
 <%
 try{
-	
-           Connection con = DBConnector.getConnection();
-           Statement st=con.createStatement();
-           int i=st.executeUpdate("SET SQL_SAFE_UPDATES = 0");
-           String query1 = "UPDATE users SET user_status=1 where user_id=?";
-           String query2 = "UPDATE users SET NO_OF_ATTEMPTS=0 where user_id=?";
-           int i2;
-           int i3;
-           synchronized(MutexLock.getUsersTableMutex())
-           {
-	           PreparedStatement pStatement = con.prepareStatement(query1);
-	           pStatement.setInt(1, no);
-	           i2 = pStatement.executeUpdate();
-	           pStatement = con.prepareStatement(query2);
-	           pStatement.setInt(1, no);
-	           i3 = pStatement.executeUpdate();
-           }
+           DBConnector.getJdbcTemplate().update("SET SQL_SAFE_UPDATES = 0");
+           DBConnector.update("UPDATE users SET user_status=1 where user_id=?", new Object[]{no}, new int[]{Types.INTEGER});
+           DBConnector.update("UPDATE users SET NO_OF_ATTEMPTS=0 where user_id=?", new Object[]{no}, new int[]{Types.INTEGER});
 }
 catch (Exception e){
-	//System.out.print(e.printStackTrace());
-	//response.sendRedirect("error.jsp");
-
+	e.printStackTrace();
+	response.sendRedirect("error.jsp");
+        return;
 }
 %>
 </table>

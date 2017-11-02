@@ -5,6 +5,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
 <%@ page import="com.group2.banking.service.*" %>
+<%@ page import="org.springframework.jdbc.support.rowset.SqlRowSet" %>
 
 <c:set var="contextPath" value="${pageContext.request.contextPath}"/>
 
@@ -116,21 +117,7 @@ String id=request.getParameter("id");
 int no=Integer.parseInt(id);
 int sumcount=0;
 try {
-Connection conn = DBConnector.getConnection();
-/* String query = "select * from users where user_id="+no;
-Statement st = conn.createStatement();
-ResultSet rs = st.executeQuery(query); */
-
-String query = "select * from users where user_id=?";
-
-
-PreparedStatement preparedStatement = conn.prepareStatement(query);
-preparedStatement.setInt(1, no);
-ResultSet rs=null;
-synchronized(MutexLock.getUsersTableMutex())
-{
-rs = preparedStatement.executeQuery();
-}
+SqlRowSet rs = DBConnector.execute("select * from users where user_id=?", new Object[]{no}, new int[]{Types.INTEGER});
 
 while(rs.next()){
 	SessionManagement.update(request,"EdituserName",rs.getString(2));

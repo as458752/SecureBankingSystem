@@ -32,7 +32,7 @@ public class UserServiceImpl implements UserService {
     	  if(user.getQ1()!=null && !user.getQ1().equals("") && !user.getQ1().equals("null")) {
     		  	params = new Object[] { (jdbcTemplate.queryForList("select * from users where username='"+user.getUsername()+"'").get(0).get("user_id")) , 1, user.getQ1()};
   	        	types = new int[] { Types.INTEGER, Types.INTEGER, Types.VARCHAR};
-  	        	synchronized(MutexLock.getUserQuesMappingTableMutex())
+  	        	synchronized(MutexLock.getLock())
 				{
   	        		jdbcTemplate.update(insertSql,params,types);
 				}
@@ -40,7 +40,7 @@ public class UserServiceImpl implements UserService {
     	  if(user.getQ2()!=null && !user.getQ2().equals("") && !user.getQ2().equals("null")) {
     		  	params = new Object[] { (jdbcTemplate.queryForList("select * from users where username='"+user.getUsername()+"'").get(0).get("user_id")) , 2, user.getQ2()};
   	        	types = new int[] { Types.INTEGER, Types.INTEGER, Types.VARCHAR};
-  	        	synchronized(MutexLock.getUserQuesMappingTableMutex())
+  	        	synchronized(MutexLock.getLock())
 				{
   	        		jdbcTemplate.update(insertSql,params,types);
 				}
@@ -48,7 +48,7 @@ public class UserServiceImpl implements UserService {
     	  if(user.getQ3()!=null && !user.getQ3().equals("") && !user.getQ3().equals("null")) {
     		  	params = new Object[] { (jdbcTemplate.queryForList("select * from users where username='"+user.getUsername()+"'").get(0).get("user_id")) , 3, user.getQ3()};
   	        	types = new int[] { Types.INTEGER, Types.INTEGER, Types.VARCHAR};
-  	        	synchronized(MutexLock.getUserQuesMappingTableMutex())
+  	        	synchronized(MutexLock.getLock())
 				{
   	        		jdbcTemplate.update(insertSql,params,types);
 				}
@@ -56,7 +56,7 @@ public class UserServiceImpl implements UserService {
     	  if(user.getQ4()!=null && !user.getQ4().equals("") && !user.getQ4().equals("null")) {
     		  	params = new Object[] { (jdbcTemplate.queryForList("select * from users where username='"+user.getUsername()+"'").get(0).get("user_id")) , 4, user.getQ4()};
   	        	types = new int[] { Types.INTEGER, Types.INTEGER, Types.VARCHAR};
-  	        	synchronized(MutexLock.getUserQuesMappingTableMutex())
+  	        	synchronized(MutexLock.getLock())
 				{
   	        		jdbcTemplate.update(insertSql,params,types);
 				}
@@ -64,7 +64,7 @@ public class UserServiceImpl implements UserService {
     	  if(user.getQ5()!=null && !user.getQ5().equals("") && !user.getQ5().equals("null")) {
     		  	params = new Object[] { (jdbcTemplate.queryForList("select * from users where username='"+user.getUsername()+"'").get(0).get("user_id")) , 5, user.getQ5()};
   	        	types = new int[] { Types.INTEGER, Types.INTEGER, Types.VARCHAR};
-  	        	synchronized(MutexLock.getUserQuesMappingTableMutex())
+  	        	synchronized(MutexLock.getLock())
 				{
   	        		jdbcTemplate.update(insertSql,params,types);
 				}
@@ -72,7 +72,7 @@ public class UserServiceImpl implements UserService {
     	  if(user.getQ6()!=null && !user.getQ6().equals("") && !user.getQ6().equals("null")) {
     		  	params = new Object[] { (jdbcTemplate.queryForList("select * from users where username='"+user.getUsername()+"'").get(0).get("user_id")) , 6, user.getQ6()};
   	        	types = new int[] { Types.INTEGER, Types.INTEGER, Types.VARCHAR};
-  	        	synchronized(MutexLock.getUserQuesMappingTableMutex())
+  	        	synchronized(MutexLock.getLock())
 				{
   	        		jdbcTemplate.update(insertSql,params,types);
 				}
@@ -92,7 +92,7 @@ public class UserServiceImpl implements UserService {
 		  	String updateSql1 =  "UPDATE users SET password= ? where username = ?";
 	    	 Object[] params1 = new Object[] {GetHash.encrypt(user.getNewpassword()), user.getUsername() };
 	    	 int[] types1 = new int[] {Types.VARCHAR, Types.VARCHAR};
-	    	 synchronized(MutexLock.getUsersTableMutex())
+	    	 synchronized(MutexLock.getLock())
 			 {
 	    		 jdbcTemplate.update(updateSql1,params1,types1);
 			 }
@@ -115,7 +115,7 @@ public class UserServiceImpl implements UserService {
 	    	 String updateSql1 =  "UPDATE users SET user_status= ? where username = ?";
 	    	 Object[] params1 = new Object[] {1, user.getUsername() };
 	    	 int[] types1 = new int[] {Types.INTEGER, Types.VARCHAR};
-	    	 synchronized(MutexLock.getUsersTableMutex())
+	    	 synchronized(MutexLock.getLock())
 			 {
 	    		 jdbcTemplate.update(updateSql1,params1,types1); 
 			 }
@@ -124,7 +124,7 @@ public class UserServiceImpl implements UserService {
 	    	 String updateSql2 =  "UPDATE users SET NO_OF_ATTEMPTS= ? where username = ?";
   	    	 Object[] params2 = new Object[] {0, user.getUsername() };
   	    	 int[] types2 = new int[] {Types.INTEGER, Types.VARCHAR};
-  	    	synchronized(MutexLock.getUsersTableMutex())
+  	    	synchronized(MutexLock.getLock())
 			 {
   	    		jdbcTemplate.update(updateSql2,params2,types2); 
 			 }
@@ -143,7 +143,7 @@ public class UserServiceImpl implements UserService {
 		   // List<User> users = jdbcTemplate.query(sql, new UserMapper());
 		    List<User> users = new ArrayList<User>();
 		    List<Map<String, Object>> rows = new ArrayList<Map<String, Object>>();
-		    synchronized(MutexLock.getUsersTableMutex())
+		    synchronized(MutexLock.getLock())
 			{
 		        rows = jdbcTemplate.queryForList(sql);
 			}
@@ -185,7 +185,7 @@ public class UserServiceImpl implements UserService {
 			  	    	 String updateSql1 =  "UPDATE users SET NO_OF_ATTEMPTS= ? where username = ?";
 			  	    	 Object[] params1 = new Object[] {users.get(0).getno_of_failed_attempts()+1 , users.get(0).getUsername() };
 			  	    	 int[] types1 = new int[] {Types.INTEGER, Types.VARCHAR};
-			  	    	synchronized(MutexLock.getUsersTableMutex())
+			  	    	synchronized(MutexLock.getLock())
 						{
 			  	    		jdbcTemplate.update(updateSql1,params1,types1); 
 						}
@@ -205,7 +205,7 @@ public class UserServiceImpl implements UserService {
 		   	 String updateSql1 =  "UPDATE users SET user_status= ? where username = ?";
 			 Object[] params1 = new Object[] {4, user1.getUsername() };
 		    int[] types1 = new int[] {Types.INTEGER, Types.VARCHAR};
-		    synchronized(MutexLock.getUsersTableMutex())
+		    synchronized(MutexLock.getLock())
 			{
 		    	jdbcTemplate.update(updateSql1,params1,types1); 
 			}
@@ -232,7 +232,7 @@ public class UserServiceImpl implements UserService {
 			 	        types1 = new int[] { Types.VARCHAR, Types.VARCHAR , Types.VARCHAR, Types.INTEGER, Types.INTEGER , Types.VARCHAR}; 
 		  	    	 }
 		 	        
-		  	    	synchronized(MutexLock.getUsersTableMutex())
+		  	    	synchronized(MutexLock.getLock())
 					{
 		  	    		jdbcTemplate.update(updateSql1,params1,types1); 
 					}
@@ -250,7 +250,7 @@ public class UserServiceImpl implements UserService {
 
 			  String sql = "select * from users where username='" + adduser.getUsername()+"' or email='"+adduser.getEmail()+"'"; 
 			  List<User> users = new ArrayList<User>();
-			  synchronized(MutexLock.getUsersTableMutex())
+			  synchronized(MutexLock.getLock())
 			  {
 				  users = jdbcTemplate.query(sql, new UserMapper());
 			  }
@@ -279,7 +279,7 @@ public class UserServiceImpl implements UserService {
 		    			  "VALUES (?,?,?,?,?,?,?,?)";
 		      Object[] params = new Object[] { adduser.getUsername(),hashedPassword,adduser.getFirstname(),adduser.getLastname(),adduser.getEmail(),adduser.getAddress(),adduser.getPhone(), adduser.getRole() };
 	        int[] types = new int[] { Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,Types.INTEGER,Types.INTEGER};
-	        synchronized(MutexLock.getUsersTableMutex())
+	        synchronized(MutexLock.getLock())
 			{
 		      jdbcTemplate.update(insertSql,params,types);
 			}
@@ -289,7 +289,7 @@ public class UserServiceImpl implements UserService {
 
 		      sql = "select * from users where username='" + adduser.getUsername()+"'";
 		      int user_id = 0;
-		      synchronized(MutexLock.getUsersTableMutex())
+		      synchronized(MutexLock.getLock())
 			  {
 		    	  user_id = (Integer)jdbcTemplate.queryForList(sql).get(0).get("user_id");
 			  }
@@ -297,7 +297,7 @@ public class UserServiceImpl implements UserService {
 	    	  if(adduser.getQ1()!=null && !adduser.getQ1().equals("") && !adduser.getQ1().equals("null")) {
 	    		  	params = new Object[] { user_id , 1, adduser.getQ1()};
 	  	        	types = new int[] { Types.INTEGER, Types.INTEGER, Types.VARCHAR};
-	  	        	 synchronized(MutexLock.getUserQuesMappingTableMutex())
+	  	        	 synchronized(MutexLock.getLock())
 	  				 {
 	  	        		 jdbcTemplate.update(insertSql,params,types);
 	  				 }
@@ -305,7 +305,7 @@ public class UserServiceImpl implements UserService {
 	    	  if(adduser.getQ2()!=null && !adduser.getQ2().equals("") && !adduser.getQ2().equals("null")) {
 	    		  	params = new Object[] { user_id , 2, adduser.getQ2()};
 	  	        	types = new int[] { Types.INTEGER, Types.INTEGER, Types.VARCHAR};
-	  	        	synchronized(MutexLock.getUserQuesMappingTableMutex())
+	  	        	synchronized(MutexLock.getLock())
 	  				 {
 	  	        	    jdbcTemplate.update(insertSql,params,types);
 	  				 }
@@ -313,7 +313,7 @@ public class UserServiceImpl implements UserService {
 	    	  if(adduser.getQ3()!=null && !adduser.getQ3().equals("") && !adduser.getQ3().equals("null")) {
 	    		  	params = new Object[] { user_id , 3, adduser.getQ3()};
 	  	        	types = new int[] { Types.INTEGER, Types.INTEGER, Types.VARCHAR};
-	  	        	synchronized(MutexLock.getUserQuesMappingTableMutex())
+	  	        	synchronized(MutexLock.getLock())
 	  				 {
 	  	        	    jdbcTemplate.update(insertSql,params,types);
 	  				 }
@@ -321,7 +321,7 @@ public class UserServiceImpl implements UserService {
 	    	  if(adduser.getQ4()!=null && !adduser.getQ4().equals("") && !adduser.getQ4().equals("null")) {
 	    		  	params = new Object[] { user_id , 4, adduser.getQ4()};
 	  	        	types = new int[] { Types.INTEGER, Types.INTEGER, Types.VARCHAR};
-	  	        	synchronized(MutexLock.getUserQuesMappingTableMutex())
+	  	        	synchronized(MutexLock.getLock())
 	  				 {
 	  	        	    jdbcTemplate.update(insertSql,params,types);
 	  				 }
@@ -329,7 +329,7 @@ public class UserServiceImpl implements UserService {
 	    	  if(adduser.getQ5()!=null && !adduser.getQ5().equals("") && !adduser.getQ5().equals("null")) {
 	    		  	params = new Object[] { user_id , 5, adduser.getQ5()};
 	  	        	types = new int[] { Types.INTEGER, Types.INTEGER, Types.VARCHAR};
-	  	        	synchronized(MutexLock.getUserQuesMappingTableMutex())
+	  	        	synchronized(MutexLock.getLock())
 	  				 {
 	  	        	    jdbcTemplate.update(insertSql,params,types);
 	  				 }
@@ -337,7 +337,7 @@ public class UserServiceImpl implements UserService {
 	    	  if(adduser.getQ6()!=null && !adduser.getQ6().equals("") && !adduser.getQ6().equals("null")) {
 	    		  	params = new Object[] { user_id , 6, adduser.getQ6()};
 	  	        	types = new int[] { Types.INTEGER, Types.INTEGER, Types.VARCHAR};
-	  	        	synchronized(MutexLock.getUserQuesMappingTableMutex())
+	  	        	synchronized(MutexLock.getLock())
 	  				 {
 	  	        	    jdbcTemplate.update(insertSql,params,types);
 	  				 }
@@ -352,7 +352,7 @@ public class UserServiceImpl implements UserService {
 
 	    	  String sql = "select * from users where username='" + adduser.getUsername()+"' or email='"+adduser.getEmail()+"'";
 	    	  List<User> users = new ArrayList<User>();
-	    	  synchronized(MutexLock.getUsersTableMutex())
+	    	  synchronized(MutexLock.getLock())
 		      {
 	    		  users = jdbcTemplate.query(sql, new UserMapper());
 		      }
@@ -380,7 +380,7 @@ public class UserServiceImpl implements UserService {
 		    			  "VALUES (?,?,?,?,?,?,?,?)";
 		      Object[] params = new Object[] { adduser.getUsername(),hashedPassword,adduser.getFirstname(),adduser.getLastname(),adduser.getEmail(),adduser.getAddress(),adduser.getPhone(), adduser.getRole() };
 	        int[] types = new int[] { Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,Types.INTEGER,Types.INTEGER};
-	        synchronized(MutexLock.getUsersTableMutex())
+	        synchronized(MutexLock.getLock())
 		    {  
 	        	jdbcTemplate.update(insertSql,params,types);
 		    }

@@ -1,3 +1,4 @@
+<%@page import="org.springframework.jdbc.support.rowset.SqlRowSet"%>
 <%@page language="java"%>
 <%@page import="java.sql.*"%>
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
@@ -43,12 +44,7 @@ function validateSession(){
 			return;
 		}
 		//ResultSet rs = DBConnector.getQueryResult("select * from users where user_id="+request.getParameter("id"));
-                PreparedStatement st1 = DBConnector.getConnection().prepareStatement("select * from users where user_id=?");
-                st1.setInt(1,Integer.parseInt(request.getParameter("id")));
-                ResultSet rs = null;
-                synchronized(MutexLock.getUsersTableMutex()){
-                    rs = st1.executeQuery();
-                }
+                SqlRowSet rs = DBConnector.execute("select * from users where user_id=?", new Object[]{Integer.parseInt(request.getParameter("id"))}, new int[]{Types.INTEGER});
 		if(!rs.next()){
 			response.sendRedirect("AuthError.jsp");
 			return;			
@@ -70,8 +66,11 @@ function validateSession(){
 				if(auth==3){
 					status = "Declined";
 				}
-				rs = DBConnector.getQueryResult("select * from users where user_id="+SessionManagement.check(request, "user_id"));
-				String email = (String)DBConnector.getMatchedValuesFromResultSet(rs,"email").get(0);
+				//rs = DBConnector.getQueryResult("select * from users where user_id="+SessionManagement.check(request, "user_id"));
+                                rs = DBConnector.execute("select * from users where user_id=?", new Object[]{Integer.parseInt(SessionManagement.check(request, "user_id"))}, new int[]{Types.INTEGER});
+				rs.next();
+                                String email = rs.getNString("email");
+                                //String email = (String)DBConnector.getMatchedValuesFromResultSet(rs,"email").get(0);
 				EmailOTPSender.getEmailOTPSender().sendMail("Status of approval", "The status of your request to view & modify this user's profile : "+status, email);
 				response.sendRedirect("ApprovalStatus.jsp");
 				return;
@@ -145,17 +144,11 @@ function getHistory(id){
 String id=request.getParameter("id");
 int no=Integer.parseInt(id);
 try{
-Connection con = null;
-PreparedStatement st;
-con = DBConnector.getConnection();
 String query = "select account.account_id,account.amount,account_type.account_desc from account inner join account_type where account.type_id = account_type.type_id and user_id=? and account_status=?";
-st = con.prepareStatement(query);
-st.setInt(1,no);
-st.setInt(2,1);
-ResultSet rs = null;
-synchronized(MutexLock.getAccountsTableMutex()){
-	rs = st.executeQuery();
-}
+//st = con.prepareStatement(query);
+//st.setInt(1,no);
+//st.setInt(2,1);
+SqlRowSet rs = DBConnector.execute(query, new Object[]{no, 1}, new int[]{Types.INTEGER, Types.INTEGER});
 Boolean isAccountPresent = false, isCreditAccountPresent = false;
 %>
 <%
@@ -175,12 +168,10 @@ while(rs.next()){
 <td><%=rs.getString(3)%></td>
 <%if(rs.getString(3).equals("Credit")){
 query = "select credit_limit from credit_card where account_id=?";
-st = con.prepareStatement(query);
-st.setInt(1, rs.getInt(1));
-ResultSet rs1 = null;
-synchronized(MutexLock.getAccountsTableMutex()){
-	rs1 = st.executeQuery();
-}
+//st = con.prepareStatement(query);
+//st.setInt(1, rs.getInt(1));
+//ResultSet rs1 = null;
+SqlRowSet rs1 = DBConnector.execute(query, new Object[]{rs.getInt(1)}, new int[]{Types.INTEGER});
 rs1.next();
 %>
 <td><%=rs1.getString(1)%></td>

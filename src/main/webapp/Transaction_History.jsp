@@ -2,6 +2,7 @@
 <%@ page import="com.group2.banking.controller.*" %>
 <%@ page import="com.group2.banking.service.*" %>
 <%@ page import="com.group2.banking.controller.*" %>
+<%@ page import="org.springframework.jdbc.support.rowset.SqlRowSet" %>
 <html>
 <head>
 <script language="javascript">
@@ -20,16 +21,12 @@ function validateSession(){
 			response.sendRedirect("AuthError.jsp");
 			return;
 		}
-
-		PreparedStatement st11 = DBConnector.getConnection().prepareStatement("select * from account where account_id=? and user_id="+SessionManagement.check(request,"user_id"));
-		st11.setInt(1,Integer.parseInt(request.getParameter("id")));
-		synchronized(MutexLock.getAccountsTableMutex()){
-			ResultSet temp = st11.executeQuery();
-			if(!temp.next()){
-				response.sendRedirect("AuthError.jsp");
-				return;
-			}
-		}
+                
+                SqlRowSet temp = DBConnector.execute("select * from account where account_id=? and user_id=?", new Object[]{Integer.parseInt(request.getParameter("id")),SessionManagement.check(request,"user_id")}, new int[]{Types.INTEGER,Types.INTEGER});
+                if(!temp.next()){
+                    response.sendRedirect("AuthError.jsp");
+                    return;
+                }
 	    }
         catch(Exception e)
         {
@@ -53,20 +50,9 @@ function validateSession(){
 <table border="1">
 <tr><th width="15">Transaction ID</th><th>Account from</th><th>Account To</th><th>Amount</th><th>Type</th><th>Status ID</th></tr>
 <%
-Connection con = null;
-
 int sumcount=0;
-PreparedStatement st = null;
 try{
-con = DBConnector.getConnection();
-st = con.prepareStatement("select * from transactions where accountFrom=? or accountTo=?");
-st.setInt(1, Integer.parseInt(request.getParameter("id")));
-st.setInt(2, Integer.parseInt(request.getParameter("id")));
-ResultSet rs=null;
-synchronized(MutexLock.getTransactionTableMutex())
-{
-	rs = st.executeQuery();
-}
+SqlRowSet rs = DBConnector.execute("select * from transactions where accountFrom=? or accountTo=?", new Object[]{Integer.parseInt(request.getParameter("id")),Integer.parseInt(request.getParameter("id"))}, new int[]{Types.INTEGER,Types.INTEGER});
 %>
 <%
 while(rs.next()){

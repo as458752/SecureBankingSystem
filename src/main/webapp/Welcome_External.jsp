@@ -2,6 +2,7 @@
 <%@ page import="com.group2.banking.controller.*" %>
 <%@ page import="com.group2.banking.service.*" %>
 <%@ page import="com.group2.banking.controller.*" %>
+<%@ page import="org.springframework.jdbc.support.rowset.SqlRowSet" %>
 <html>
 <head>
 <script language="javascript">
@@ -55,23 +56,9 @@ function AccountDetails(id) {
 <table border="1">
 <tr><th width="15">User ID</th><th>User Name</th><th>First Name</th><th>Lastname</th><th>Email</th><th>Address</th><th>Phone</th><th>Role</th><th>Edit</th><th>Account</th></tr>
 <%
-Connection con = null;
-String url = "jdbc:mysql://localhost:3306/";
-String db = "bank";
-String driver = "com.mysql.jdbc.Driver";
-String userName ="root";
-
 int sumcount=0;
-Statement st;
 try{
-con = DBConnector.getConnection();
-String query = "select * from users where user_status="+1+" and user_id="+SessionManagement.check(request, "user_id");
-st = con.createStatement();
-ResultSet rs=null;
-synchronized(MutexLock.getUsersTableMutex())
-{
-rs = st.executeQuery(query);
-}
+SqlRowSet rs = DBConnector.execute("select * from users where user_status=1 and user_id=?", new Object[]{Integer.parseInt(SessionManagement.check(request, "user_id"))}, new int[]{Types.INTEGER});
 %>
 <%
 while(rs.next()){

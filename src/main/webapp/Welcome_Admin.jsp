@@ -71,25 +71,9 @@ function AccountDetails(id) {
 <table border="1">
 <tr><th width="15">User ID</th><th>User Name</th><th>First Name</th><th>Lastname</th><th>Email</th><th>Address</th><th>Phone</th><th>Role</th><th>Edit</th></tr>
 <%
-Connection con = null;
-String url = "jdbc:mysql://localhost:3306/";
-String db = "bank";
-String driver = "com.mysql.jdbc.Driver";
-String userName ="root";
-
 int sumcount=0;
-Statement st;
 try{
-con = DBConnector.getConnection();
-String query = "select * from users where user_status=1 and user_id=?"; 
-st = con.createStatement();
-SqlRowSet rs = null;
-
-
-synchronized(MutexLock.getUsersTableMutex())
-{
-rs = DBConnector.execute(query, new Object[]{SessionManagement.check(request, "user_id")}, new int[]{Types.INTEGER});
-}
+SqlRowSet rs = DBConnector.execute("select * from users where user_status=1 and user_id=?", new Object[]{SessionManagement.check(request, "user_id")}, new int[]{Types.INTEGER});;
 %>
 <%
 while(rs.next()){
@@ -119,10 +103,7 @@ catch(Exception e){
 <tr><th width="15">User ID</th><th>User Name</th><th>First Name</th><th>Lastname</th><th>Email</th><th>Address</th><th>Phone</th><th>Role</th><th>Edit</th><th>Delete</th><th>Account</th></tr>
 <%
 try{
-con = DBConnector.getConnection();
-String query = "select * from users where user_status=1 and role_id in (4,5)";
-st = con.createStatement();
-ResultSet rs = st.executeQuery(query);
+SqlRowSet rs = DBConnector.execute("select * from users where user_status=? and role_id in (4,5)", new Object[]{1}, new int[]{Types.INTEGER});
 %>
 <%
 while(rs.next()){
@@ -154,10 +135,7 @@ catch(Exception e){
 <tr><th width="15">User ID</th><th>User Name</th><th>First Name</th><th>Lastname</th><th>Email</th><th>Address</th><th>Phone</th><th>Role</th><th>Edit</th><th>Delete</th></tr>
 <%
 try{
-con = DBConnector.getConnection();
-String query = "select * from users where user_status=1 and role_id in (1,2,3) and user_id not in ("+SessionManagement.check(request, "user_id")+")";
-st = con.createStatement();
-ResultSet rs = st.executeQuery(query);
+SqlRowSet rs = DBConnector.execute("select * from users where user_status=1 and role_id in (1,2,3) and user_id<>?", new Object[]{Integer.parseInt(SessionManagement.check(request, "user_id"))}, new int[]{Types.INTEGER});
 %>
 <%
 while(rs.next()){

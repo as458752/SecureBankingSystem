@@ -1,3 +1,4 @@
+<%@page import="org.springframework.jdbc.support.rowset.SqlRowSet"%>
 <%@page language="java"%>
 <%@page import="java.sql.*"%>
 <%@ page import="com.group2.banking.controller.*" %>
@@ -43,12 +44,8 @@ function validateSession(){
 		}
 		
 		//ResultSet rs = DBConnector.getQueryResult("select * from account where account_id="+request.getParameter("id"));
-		PreparedStatement st = DBConnector.getConnection().prepareStatement("select * from account where account_id=?");
-		st.setInt(1,Integer.parseInt(request.getParameter("id")));
-		ResultSet rs = null;
-		synchronized(MutexLock.getAccountsTableMutex()){
-			rs = st.executeQuery();
-		}
+		//PreparedStatement st = DBConnector.getConnection().prepareStatement("select * from account where account_id=?");
+                SqlRowSet rs = DBConnector.execute("select * from account where account_id=?", new Object[]{Integer.parseInt(request.getParameter("id"))}, new int[]{Types.INTEGER});
 		
 		String user_id = "";
 		if(rs.next()){
@@ -70,7 +67,8 @@ function validateSession(){
 		}
 		
 		if(rs.getInt(4)!=3){
-			ResultSet rs1 = DBConnector.getQueryResult("select * from account where user_id="+rs.getInt(2));
+			//ResultSet rs1 = DBConnector.getQueryResult("select * from account where user_id="+rs.getInt(2));
+                        SqlRowSet rs1 = DBConnector.execute("select * from account where user_id=?", new Object[]{rs.getInt(2)}, new int[]{Types.INTEGER});
 			int counter = 0;
 			Boolean isCreditPresent = false;
 			while(rs1.next()){
@@ -129,16 +127,12 @@ function GoBackToAccount(id){
 String id=request.getParameter("id");
 int no=Integer.parseInt(id);
 try{
-Connection con = null;
-PreparedStatement st;
-con = DBConnector.getConnection();
+//PreparedStatement st;
+//con = DBConnector.getConnection();
 String query = "select user_id,account_id,amount,b.account_desc from account a,account_type b where a.type_id=b.type_id and account_id=?";
-st = con.prepareStatement(query);
-st.setInt(1, no);
-ResultSet rs = null;
-synchronized(MutexLock.getAccountsTableMutex()){
-	rs = st.executeQuery();
-}
+//st = con.prepareStatement(query);
+//st.setInt(1, no);
+SqlRowSet rs = DBConnector.execute(query, new Object[]{no}, new int[]{Types.INTEGER});
 %>
 <%
 while(rs.next()){
@@ -164,14 +158,13 @@ catch(Exception e){
 try{
 	int no1=Integer.parseInt(id);
            Connection con = DBConnector.getConnection();
-           PreparedStatement st=con.prepareStatement("SET SQL_SAFE_UPDATES = 0");
-           int i=st.executeUpdate();
+           //PreparedStatement st=con.prepareStatement("SET SQL_SAFE_UPDATES = 0");
+           DBConnector.update("SET SQL_SAFE_UPDATES = ?", new Object[]{0}, new int[]{Types.INTEGER});
+           //int i=st.executeUpdate();
            
-           st = con.prepareStatement("delete from account where account_id=?");
-           st.setInt(1, no1);
-           synchronized(MutexLock.getAccountsTableMutex()){
-           	int i1=st.executeUpdate();
-           }
+           //st = con.prepareStatement("delete from account where account_id=?");
+           //st.setInt(1, no1);
+           DBConnector.update("delete from account where account_id=?", new Object[]{no1}, new int[]{Types.INTEGER});
 }
 catch (Exception e){
 	response.sendRedirect("error.jsp");

@@ -21,6 +21,7 @@ import org.springframework.web.servlet.ModelAndView;
 import com.group2.banking.model.*;
 import java.util.Arrays;
 import java.util.List;
+import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.web.servlet.view.RedirectView;
 
 @Controller
@@ -83,7 +84,7 @@ public class BaseController {
 			user.setNewpassword(SessionManagement.check(request, "new_password"));
 			user.setReenter_newpassword((SessionManagement.check(request,"re_new_password")));
 
-			synchronized(MutexLock.getUsersTableMutex())
+			synchronized(MutexLock.getLock())
 			{
 				user.setUsername((String)template.getJdbcTemplate().queryForList("select * from users where user_id="+SessionManagement.check(request, "user_id")).get(0).get("username"));
 			}
@@ -110,7 +111,7 @@ public class BaseController {
 		else{
 			
 			String user_id = "";
-			synchronized(MutexLock.getUsersTableMutex())
+			synchronized(MutexLock.getLock())
 			{
 				user_id = ((Integer)template.getJdbcTemplate().queryForList("select * from users where username='"+SessionManagement.check(request, "userName")+"'").get(0).get("user_id")).toString();
 				//SessionManagement.update(request, "user_id", ((Integer)template.getJdbcTemplate().queryForList("select * from users where username='"+SessionManagement.check(request, "userName")+"'").get(0).get("user_id")).toString());
@@ -118,9 +119,8 @@ public class BaseController {
 			}
 			mav = new ModelAndView(nextPage);
             SessionManagement.addCookie(request, response, GetHash.encrypt(user_id));
-            String query = "update bank.users set NO_OF_ATTEMPTS = 0 where user_id = " + user_id;
-                Statement st = (Statement)DBConnector.getConnection().createStatement();
-                st.executeUpdate(query);
+
+                DBConnector.update("update bank.users set NO_OF_ATTEMPTS = 0 where user_id = ?", new Object[]{Integer.parseInt(user_id)}, new int[]{Types.INTEGER});
             return mav;
 		}
 		
@@ -224,7 +224,7 @@ public class BaseController {
 				return mav;
 			}
 			String user_id = "";
-			synchronized(MutexLock.getUsersTableMutex())
+			synchronized(MutexLock.getLock())
             {
                 user_id = ((Integer)template.getJdbcTemplate().queryForList("select * from users where username='"+user.getUsername()+"'").get(0).get("user_id")).toString();
                 SessionManagement.update(request, "user_id", user_id);
@@ -232,9 +232,7 @@ public class BaseController {
             }
             if(SessionManagement.checkCookie(request, GetHash.encrypt(user_id)))
             {
-                String query = "update bank.users set NO_OF_ATTEMPTS = 0 where user_id = " + user_id;
-                Statement st = (Statement)DBConnector.getConnection().createStatement();
-                st.executeUpdate(query);
+                DBConnector.update("update bank.users set NO_OF_ATTEMPTS = 0 where user_id = ?", new Object[]{Integer.parseInt(user_id)}, new int[]{Types.INTEGER});
                 mav = new ModelAndView("welcome");
                 
                 return mav;
@@ -243,7 +241,7 @@ public class BaseController {
 			
 			EmailOTPSender sender = EmailOTPSender.getEmailOTPSender();
 			String otp = sender.generateOTP();
-			synchronized(MutexLock.getUsersTableMutex())
+			synchronized(MutexLock.getLock())
 			{
 				sender.sendMail("GoSwiss OTP", "Your OTP for logging in is = "+otp,(String) template.getJdbcTemplate().queryForList("select * from users where username='"+user.getUsername()+"'").get(0).get("email"));
 			}
@@ -356,13 +354,13 @@ public class BaseController {
 		ModelAndView mav = null;
 	    mav = new ModelAndView("otp");
 	    String pass = "";
-	    synchronized(MutexLock.getUsersTableMutex())
+	    synchronized(MutexLock.getLock())
 		{
 	    	pass = (String)template.getJdbcTemplate().queryForList("select * from users where user_id="+SessionManagement.check(request, "user_id")).get(0).get("password");
 		}
 	    if(!GetHash.encrypt(user.getPassword()).equals(pass)){
 	    	Login login = new Login();
-	    	synchronized(MutexLock.getUsersTableMutex())
+	    	synchronized(MutexLock.getLock())
 			{
 		  		login.setUsername((String)template.getJdbcTemplate().queryForList("select * from users where user_id="+SessionManagement.check(request, "user_id")).get(0).get("username"));
 		  		login.setPassword((String)template.getJdbcTemplate().queryForList("select * from users where user_id="+SessionManagement.check(request, "user_id")).get(0).get("password"));
@@ -371,7 +369,7 @@ public class BaseController {
 	  		if(userService.validateUser(login)==null){
 	  			mav = new ModelAndView("changepassword");
 	  			int user_status = 0;
-	  			synchronized(MutexLock.getUsersTableMutex())
+	  			synchronized(MutexLock.getLock())
 				{
 	  				user_status = (Integer)template.getJdbcTemplate().queryForList("select * from users where user_id="+SessionManagement.check(request, "user_id")).get(0).get("user_status");
 				}
@@ -387,7 +385,7 @@ public class BaseController {
 
 	    EmailOTPSender sender = EmailOTPSender.getEmailOTPSender();
 		String otp = sender.generateOTP();
-		synchronized(MutexLock.getUsersTableMutex())
+		synchronized(MutexLock.getLock())
 		{
 			sender.sendMail("GoSwiss OTP", "Your OTP for changing password is = "+otp,(String) template.getJdbcTemplate().queryForList("select * from users where user_id="+SessionManagement.check(request, "user_id")).get(0).get("email"));
 		}
@@ -424,14 +422,7 @@ public class BaseController {
 	    // edituser.setUsername(request.getParameter("username"));
 	    edituser.setUsername(SessionManagement.check(request, "EdituserName"));
 	    
-	    //ResultSet rs = DBConnector.getQueryResult("select * from users where email='"+edituser.getEmail()+"'");
-	    PreparedStatement st = DBConnector.getConnection().prepareStatement("select * from users where email=? and username<>?");
-	    st.setString(1, edituser.getEmail());
-	    st.setString(2, edituser.getUsername());
-	    ResultSet rs = null;
-	    synchronized(MutexLock.getUsersTableMutex()) {
-	    	rs = st.executeQuery();
-	    }
+            SqlRowSet rs = DBConnector.execute("select * from users where email=? and username<>?", new Object[]{edituser.getEmail(),edituser.getUsername()}, new int[]{Types.VARCHAR,Types.VARCHAR});
 	    
 	    if(rs.next()) {
 	    	if(SessionManagement.check(request,"user_role").equals("1")) {
@@ -471,7 +462,7 @@ public class BaseController {
  	        	types1 = new int[] { Types.VARCHAR, Types.VARCHAR , Types.VARCHAR, Types.BIGINT, Types.VARCHAR, Types.VARCHAR};
     	    }
 	    }
-	    synchronized(MutexLock.getUsersTableMutex())
+	    synchronized(MutexLock.getLock())
 		{
 	    	template.getJdbcTemplate().update(updateSql1,params1,types1);
 		}
@@ -515,7 +506,7 @@ public class BaseController {
                         SessionManagement.update(request, "From_Transaction", "yes");
                         EmailOTPSender sender = EmailOTPSender.getEmailOTPSender();
 			String otp = sender.generateOTP();
-			synchronized(MutexLock.getUsersTableMutex())
+			synchronized(MutexLock.getLock())
 			{
 				sender.sendMail("GoSwiss OTP", "Your OTP for logging in is = "+otp,(String) template.getJdbcTemplate().queryForList("select * from users where user_id='"+SessionManagement.check(request,"user_id")+"'").get(0).get("email"));
 			}
@@ -534,9 +525,7 @@ public class BaseController {
                         List<String> idsList = Arrays.asList(ids.split(","));
                         String user_id = idsList.get(0);
                         String acc_id = idsList.get(1);
-                        String query = "update bank.credit_card set credit_limit = " + new_limit + " where account_id = " + acc_id;
-                        Statement st = (Statement)DBConnector.getConnection().createStatement();
-                        st.executeUpdate(query);
+                        DBConnector.update("update bank.credit_card set credit_limit = ? where account_id = ?", new Object[]{Integer.parseInt(new_limit),Integer.parseInt(acc_id)}, new int[]{Types.INTEGER,Types.INTEGER});
                         mav.setView(new RedirectView("Account.jsp?id=" + user_id, true));
                         return mav;
                     }
@@ -567,17 +556,13 @@ public class BaseController {
             }
             else if (request.getParameter("action").equals("debit"))
             {
-                String query = "insert into bank.transactions (accountTo, amount, type_id, status_id) value(" + account_id + "," + amount + ",2,3);";
-                Statement st = (Statement)DBConnector.getConnection().createStatement();
-                int result = st.executeUpdate(query);
+                int result = DBConnector.update("insert into bank.transactions (accountTo, amount, type_id, status_id) value(?,?,2,3)", new Object[]{account_id,amount}, new int[]{Types.INTEGER,Types.INTEGER});
                 if(result == 1)  mav.addObject("message","Debit $" + amount + " request Sent");
                 else    mav.addObject("error","execute sql query failed!");
             }
             else if (request.getParameter("action").equals("credit"))
             {
-                String query = "insert into bank.transactions (accountTo, amount, type_id, status_id) value(" + account_id + "," + amount + ",1,3);";
-                Statement st = (Statement)DBConnector.getConnection().createStatement();
-                int result = st.executeUpdate(query);
+                int result = DBConnector.update("insert into bank.transactions (accountTo, amount, type_id, status_id) value(?,?,1,3)", new Object[]{account_id,amount}, new int[]{Types.INTEGER,Types.INTEGER});
                 if(result == 1)  mav.addObject("message","Credit $" + amount + " request Sent"); 
                 else    mav.addObject("error","execute sql query failed!"); 
             }
@@ -622,13 +607,8 @@ public class BaseController {
                     mav.addObject("error","Receiver ID is invalid!");
                     return mav;
                 }
-                //ResultSet rs = DBConnector.getQueryResult("select * from account where account_id="+receiver_id);
-                PreparedStatement st1 = DBConnector.getConnection().prepareStatement("select * from account where account_id=?");
-                st1.setInt(1,receiver_id);
-                ResultSet rs = null;
-                synchronized(MutexLock.getAccountsTableMutex()){
-                    rs = st1.executeQuery();
-                }
+
+                SqlRowSet rs = DBConnector.execute("select * from account where account_id=?", new Object[]{receiver_id}, new int[]{Types.INTEGER});
                 
                 if(!rs.next())
                 {
@@ -636,32 +616,24 @@ public class BaseController {
                     return mav;
                 }
                 int receiver_userid = (Integer) rs.getObject("user_id");
-                String query = "";
-                if (user_id == receiver_userid) query = "insert into bank.transactions (accountFrom, accountTo, amount, type_id, status_id) value(" + account_id + "," + receiver_id + "," + amount + ",3,3);";
-                else query = "insert into bank.transactions (accountFrom, accountTo, amount, type_id, status_id) value(" + account_id + "," + receiver_id + "," + amount + ",3,2);";
-                Statement st = (Statement)DBConnector.getConnection().createStatement();
-                int result = st.executeUpdate(query);
+                int result = 0;
+                if (user_id == receiver_userid) result = DBConnector.update("insert into bank.transactions (accountFrom, accountTo, amount, type_id, status_id) value(?,?,?,3,3)", new Object[]{account_id,receiver_id,amount}, new int[]{Types.INTEGER,Types.INTEGER,Types.INTEGER});
+                else result = DBConnector.update("insert into bank.transactions (accountFrom, accountTo, amount, type_id, status_id) value(?,?,?,2,3)", new Object[]{account_id,receiver_id,amount}, new int[]{Types.INTEGER,Types.INTEGER,Types.INTEGER});
+
                 if(result == 1) mav.addObject("message1","Transfer $" + amount + " to account "+ receiver +" request Sent");  
                 else    mav.addObject("message1", "execute sql query failed!");    
             }
             else if (request.getParameter("way").equals("email"))
             {
-                //ResultSet rs = DBConnector.getQueryResult("select * from users where email like '%" + receiver + "%'");
-                PreparedStatement st1 = DBConnector.getConnection().prepareStatement("select * from users where email=?");
-                st1.setString(1,receiver);
-                ResultSet rs = null;
-                synchronized(MutexLock.getUsersTableMutex()){
-                    rs = st1.executeQuery();
-                }
+                SqlRowSet rs = DBConnector.execute("select * from users where email=?", new Object[]{receiver}, new int[]{Types.VARCHAR});
+
                 if(!rs.next())
                 {
                     mav.addObject("message1", "The email address does not exist!");
                     return mav;
                 }
                 int receiver_userid = (Integer) rs.getObject("user_id");
-                String query = "insert into bank.transactions (accountFrom, amount, receiver_id, type_id, status_id) value(" + account_id + "," + amount + "," + receiver_userid + ",3,1);";
-                Statement st = (Statement)DBConnector.getConnection().createStatement();
-                int result = st.executeUpdate(query);
+                int result = DBConnector.update("insert into bank.transactions (accountFrom, amount, receiver_id, type_id, status_id) value(?,?,?,3,1)", new Object[]{account_id,amount,receiver_userid}, new int[]{Types.INTEGER,Types.INTEGER,Types.INTEGER});
                 if(result == 1) mav.addObject("message1","Transfer $" + amount + " to email "+ receiver +" request Sent"); 
                 else    mav.addObject("message1", "execute sql query failed!");
             }
@@ -679,7 +651,7 @@ public class BaseController {
     public ModelAndView ModelAndView(HttpServletRequest request, HttpServletResponse response) {
     	try {
     		ModelAndView mav = new ModelAndView("CreditAccountFunctions");
-    		ResultSet rs = DBConnector.getQueryResult("select * from account where type_id=3 and account_status=1 and user_id="+SessionManagement.check(request, "user_id"));
+                SqlRowSet rs = DBConnector.execute("select * from account where type_id=3 and account_status=1 and user_id=?", new Object[]{Integer.parseInt(SessionManagement.check(request, "user_id"))}, new int[]{Types.INTEGER});
     		if(!rs.next() && SessionManagement.check(request, "user_role").equals("4")) {
     			mav = new ModelAndView("AuthError");
     			return mav;
@@ -710,15 +682,8 @@ public class BaseController {
     		}
     		int debitaccountID = Integer.parseInt(request.getParameter("AccountNo"));
     		int creditaccountID = Integer.parseInt(SessionManagement.check(request,"account_id"));
-    		
-    		PreparedStatement st = DBConnector.getConnection().prepareStatement("insert into transactions (accountFrom,accountTo,amount,type_id,status_id) values(?,?,?,5,9)");
-    		st.setInt(1, debitaccountID);
-    		st.setInt(2, creditaccountID);
-    		st.setInt(3, amount);
-    		
-    		synchronized(MutexLock.getTransactionTableMutex()) {
-    			st.executeUpdate();
-    		}
+
+                DBConnector.update("insert into transactions (accountFrom,accountTo,amount,type_id,status_id) values(?,?,?,5,9)", new Object[]{debitaccountID,creditaccountID,amount}, new int[]{Types.INTEGER,Types.INTEGER,Types.INTEGER});
     		mav.addObject("message", "Payment of $"+amount+" has been submitted");
     		return mav;
     	}
@@ -744,27 +709,15 @@ public class BaseController {
     		int cvv = Integer.parseInt(request.getParameter("cvv"));
     		long issue_time = Long.parseLong(request.getParameter("date"));
     		
-    		PreparedStatement st = DBConnector.getConnection().prepareStatement("select * from credit_card where card_id=? and cvv=? and exp_date=?");
-    		st.setInt(1, card_no);
-    		st.setInt(2, cvv);
-    		st.setLong(3, issue_time);
-    		
-    		ResultSet rs = st.executeQuery();
+    		SqlRowSet rs = DBConnector.execute("select * from credit_card where card_id=? and cvv=? and exp_date=?", new Object[]{card_no,cvv,issue_time}, new int[]{Types.INTEGER,Types.INTEGER,Types.BIGINT});
     		if(!rs.next()) {
     			mav.addObject("error","Invalid card details");
     			return mav;
     		}
     		
     		int creditaccountID = rs.getInt(5);
-    		
-    		st = DBConnector.getConnection().prepareStatement("insert into transactions (accountFrom,accountTo,amount,type_id,status_id) values(?,?,?,5,8)");
-    		st.setInt(1, creditaccountID);
-    		st.setInt(2, debitaccountID);
-    		st.setInt(3, amount);
-    		
-    		synchronized(MutexLock.getTransactionTableMutex()) {
-    			st.executeUpdate();
-    		}
+                
+                DBConnector.update("insert into transactions (accountFrom,accountTo,amount,type_id,status_id) values(?,?,?,5,8)", new Object[]{creditaccountID,debitaccountID,amount}, new int[]{Types.INTEGER,Types.INTEGER,Types.INTEGER});
     		mav.addObject("error", "A payment of $"+amount+" has been requested");
     		return mav;
     	}

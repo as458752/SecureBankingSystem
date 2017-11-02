@@ -1,6 +1,7 @@
 <%@ page import="java.sql.*" %>
 <%@ page import="com.group2.banking.controller.*" %>
 <%@ page import="com.group2.banking.service.*" %>
+<%@ page import="org.springframework.jdbc.support.rowset.SqlRowSet" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <c:set var="contextPath" value="${pageContext.request.contextPath}"/>
 <html>
@@ -54,23 +55,9 @@ function temp(id) {
 <table border="1">
 <tr><th width="15">User ID</th><th>User Name</th><th>Password</th><th>First Name</th><th>Lastname</th><th>Email</th><th>Address</th><th>Phone</th><th>Role</th><th>Unlock</th></tr>
 <%
-Connection con = null;
-String url = "jdbc:mysql://localhost:3306/";
-String db = "bank";
-String driver = "com.mysql.jdbc.Driver";
-String userName ="root";
-
 int sumcount=0;
-Statement st;
 try{
-con = DBConnector.getConnection();
-String query = "";
-synchronized(MutexLock.getUsersTableMutex())
-{
-	query = "select * from users where user_status="+4;
-}
-st = con.createStatement();
-ResultSet rs = st.executeQuery(query);
+SqlRowSet rs = DBConnector.execute("select * from users where user_status=?", new Object[]{4}, new int[]{Types.INTEGER});
 %>
 <%
 while(rs.next()){

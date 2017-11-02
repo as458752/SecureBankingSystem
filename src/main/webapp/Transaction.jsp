@@ -1,6 +1,7 @@
 <%@ page import="java.sql.*" %>
 <%@page import="com.group2.banking.service.*" %>
 <%@page import="com.group2.banking.controller.*" %>
+<%@ page import="org.springframework.jdbc.support.rowset.SqlRowSet" %>
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
@@ -25,15 +26,9 @@ function validateSession(){
 			response.sendRedirect("AuthError.jsp");
 			return;
 		}
-		
-		Connection con = DBConnector.getConnection();
-		PreparedStatement st = con.prepareStatement("select * from account where account_id=? and user_id=?");
-		st.setInt(1, Integer.parseInt(SessionManagement.check(request,"account_id")));
-		st.setInt(2, Integer.parseInt(SessionManagement.check(request,"user_id")));
-		ResultSet rs = null;
-		synchronized(MutexLock.getAccountsTableMutex()){
-			rs = st.executeQuery();
-		}
+
+		SqlRowSet rs = DBConnector.execute("select * from account where account_id=? and user_id=?", new Object[]{Integer.parseInt(SessionManagement.check(request,"account_id")),Integer.parseInt(SessionManagement.check(request,"user_id"))}, new int[]{Types.INTEGER,Types.INTEGER});
+
 		if(!rs.next()){
 			response.sendRedirect("AuthError.jsp");
 			return;
@@ -68,10 +63,11 @@ function goback(){
 <%
    try{
 	int user_id = Integer.parseInt((String)SessionManagement.check(request,"user_id"));
-	ResultSet rs = DBConnector.getQueryResult("select * from users where user_id="+user_id);
-	String name = (String)DBConnector.getMatchedValuesFromResultSet(rs, "firstname").get(0);
+        SqlRowSet rs = DBConnector.execute("select * from users where user_id=?", new Object[]{user_id}, new int[]{Types.INTEGER});
+        rs.next();
+	String name = rs.getString(4);
         int account_id = Integer.parseInt((String)SessionManagement.check(request,"account_id"));
-        rs = DBConnector.getQueryResult("select account_type.account_desc, account.amount from account_type inner join account on account_type.type_id=account.type_id where account.account_id="+account_id);
+        rs = DBConnector.execute("select account_type.account_desc, account.amount from account_type inner join account on account_type.type_id=account.type_id where account.account_id=?", new Object[]{account_id}, new int[]{Types.INTEGER});
         rs.next();
         String type = (String) rs.getObject("account_desc");
         Integer balance = (Integer) rs.getObject("amount");
@@ -115,6 +111,7 @@ function goback(){
       }
       catch(Exception e)
       {
+           e.printStackTrace();
 	   response.sendRedirect("error.jsp");
       }
 %>

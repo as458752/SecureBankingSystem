@@ -1,3 +1,4 @@
+<%@page import="org.springframework.jdbc.support.rowset.SqlRowSet"%>
 <%@ page import="java.sql.*" %>
 <%@page import="com.group2.banking.service.*" %>
 <%@page import="com.group2.banking.controller.*" %>
@@ -26,14 +27,12 @@ function validateSession(){
 			return;
 		}
 		
-		Connection con = DBConnector.getConnection();
-		PreparedStatement st = con.prepareStatement("select * from account where account_id=? and type_id=3 and user_id=?");
-		st.setInt(1, Integer.parseInt(SessionManagement.check(request,"account_id")));
-		st.setInt(2, Integer.parseInt(SessionManagement.check(request,"user_id")));
-		ResultSet rs = null;
-		synchronized(MutexLock.getAccountsTableMutex()){
-			rs = st.executeQuery();
-		}
+		//Connection con = DBConnector.getConnection();
+		//PreparedStatement st = con.prepareStatement("select * from account where account_id=? and type_id=3 and user_id=?");
+		//st.setInt(1, Integer.parseInt(SessionManagement.check(request,"account_id")));
+		//st.setInt(2, Integer.parseInt(SessionManagement.check(request,"user_id")));
+		//ResultSet rs = null;
+                SqlRowSet rs = DBConnector.execute("select * from account where account_id=? and type_id=3 and user_id=?", new Object[]{Integer.parseInt(SessionManagement.check(request,"account_id")), Integer.parseInt(SessionManagement.check(request,"user_id"))}, new int[]{Types.INTEGER, Types.INTEGER});
 		if(!rs.next() && SessionManagement.check(request,"user_role").equals("4")){
 			response.sendRedirect("AuthError.jsp");
 			return;
@@ -61,12 +60,14 @@ function validateSession(){
 	   	int role = Integer.parseInt(SessionManagement.check(request,"user_role"));
 %>
 	<%if(role==4){ 
-		ResultSet creditAcc = DBConnector.getQueryResult("select * from account where type_id=3 and account_status=1 and user_id="+user_id);
+		//ResultSet creditAcc = DBConnector.getQueryResult("select * from account where type_id=3 and account_status=1 and user_id="+user_id);
+                SqlRowSet creditAcc = DBConnector.execute("select * from account where type_id=3 and account_status=1 and user_id=?", new Object[]{user_id}, new int[]{Types.INTEGER});
 	   	if(!creditAcc.next()){
 	   		response.sendRedirect("AuthError.jsp");
 			return;
 	   	}
-	   	ResultSet cardDet = DBConnector.getQueryResult("select * from credit_card where account_id="+creditAcc.getInt(1));
+	   	//ResultSet cardDet = DBConnector.getQueryResult("select * from credit_card where account_id="+creditAcc.getInt(1));
+                SqlRowSet cardDet = DBConnector.execute("select * from credit_card where account_id=?", new Object[]{creditAcc.getInt(1)}, new int[]{Types.INTEGER});
 	   	if(!cardDet.next()){
 	   		response.sendRedirect("AuthError.jsp");
 			return;
@@ -84,7 +85,8 @@ function validateSession(){
             <strong>Choose Your Debit Account : </strong>
             <select name="AccountNo">
             	<%
-					ResultSet debitAcc = DBConnector.getQueryResult("select * from account where type_id<>3 and account_status<>3 and user_id="+user_id);
+			//ResultSet debitAcc = DBConnector.getQueryResult("select * from account where type_id<>3 and account_status<>3 and user_id="+user_id);
+                        SqlRowSet debitAcc = DBConnector.execute("select * from account where type_id<>3 and account_status<>3 and user_id=?", new Object[]{user_id}, new int[]{Types.INTEGER});
             		Boolean temp = false;
             		while(debitAcc.next()){
             			temp = true;
@@ -118,7 +120,8 @@ function validateSession(){
             <strong>Choose Your Debit Account : </strong>
             <select name="AccountNo">
             	<%
-					ResultSet debitAcc = DBConnector.getQueryResult("select * from account where type_id<>3 and account_status<>3 and user_id="+user_id);
+			//ResultSet debitAcc = DBConnector.getQueryResult("select * from account where type_id<>3 and account_status<>3 and user_id="+user_id);
+                        SqlRowSet debitAcc = DBConnector.execute("select * from account where type_id<>3 and account_status<>3 and user_id=?", new Object[]{user_id}, new int[]{Types.INTEGER});
             		Boolean temp = false;
             		while(debitAcc.next()){
             			temp = true;
