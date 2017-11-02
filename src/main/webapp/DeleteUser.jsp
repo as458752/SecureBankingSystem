@@ -104,7 +104,7 @@ catch(Exception e){
 <%
 try{
 	
-           Connection con = DBConnector.getConnection();
+           //Connection con = DBConnector.getConnection();
            String query0="SET SQL_SAFE_UPDATES = ?";
            String query1="delete from account where user_id=?";
            String query2="delete from user_ques_mapping  where user_id=?";

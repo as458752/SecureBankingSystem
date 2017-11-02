@@ -157,7 +157,7 @@ catch(Exception e){
 <%
 try{
 	int no1=Integer.parseInt(id);
-           Connection con = DBConnector.getConnection();
+           //Connection con = DBConnector.getConnection();
            //PreparedStatement st=con.prepareStatement("SET SQL_SAFE_UPDATES = 0");
            DBConnector.update("SET SQL_SAFE_UPDATES = ?", new Object[]{0}, new int[]{Types.INTEGER});
            //int i=st.executeUpdate();
