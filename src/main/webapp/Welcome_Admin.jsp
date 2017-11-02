@@ -90,7 +90,6 @@ synchronized(MutexLock.getUsersTableMutex())
 {
 rs = st.executeQuery(query);
 }
-
 %>
 <%
 while(rs.next()){

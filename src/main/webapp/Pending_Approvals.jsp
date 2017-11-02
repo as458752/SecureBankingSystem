@@ -56,8 +56,8 @@ function DeclineAccount(id) {
 function ApproveTransaction(id){
 	var f=document.form;
 	f.method="post";
-	if(document.form.contains(document.form.Accounts)){
-		f.action='ApproveTransaction.jsp?id='+id+"&id1="+document.form.Accounts.value;	
+	if(document.form.contains(document.getElementById(id))){
+		f.action='ApproveTransaction.jsp?id='+id+"&id1="+document.getElementById(id).value;	
 	}
 	else{
 		f.action='ApproveTransaction.jsp?id='+id;
@@ -68,8 +68,8 @@ function ApproveTransaction(id){
 function DeclineTransaction(id){
 	var f=document.form;
 	f.method="post";
-	if(document.form.contains(document.form.Accounts)){
-		f.action='DeclineTransaction.jsp?id='+id+"&id1="+document.form.Accounts.value;	
+	if(document.form.contains(document.getElementById(id))){
+		f.action='DeclineTransaction.jsp?id='+id+"&id1="+document.getElementById(id).value;	
 	}
 	else{
 		f.action='DeclineTransaction.jsp?id='+id;
@@ -228,7 +228,7 @@ if((SessionManagement.check(request,"user_role").equals("4") || SessionManagemen
 		ResultSet rs1 = DBConnector.getQueryResult("select * from account where account_status=1 and type_id<>3 and user_id="+SessionManagement.check(request,"user_id"));
 		List<Object> accounts = DBConnector.getMatchedValuesFromResultSet(rs1, "account_id");
 		if(accounts.size()>0){
-			%><select name="Accounts"><%
+			%><select id="<%=rs.getString(1)%>" name="Accounts"><%
 			for(int i=0;i<accounts.size();i++){%>
 				<option value="<%=accounts.get(i)%>"><%=accounts.get(i)%></option>
 			<%}%></select><%}}%>

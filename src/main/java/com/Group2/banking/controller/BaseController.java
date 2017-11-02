@@ -82,6 +82,7 @@ public class BaseController {
 			user.setPassword(SessionManagement.check(request, "password"));
 			user.setNewpassword(SessionManagement.check(request, "new_password"));
 			user.setReenter_newpassword((SessionManagement.check(request,"re_new_password")));
+
 			synchronized(MutexLock.getUsersTableMutex())
 			{
 				user.setUsername((String)template.getJdbcTemplate().queryForList("select * from users where user_id="+SessionManagement.check(request, "user_id")).get(0).get("username"));
@@ -235,6 +236,7 @@ public class BaseController {
                 Statement st = (Statement)DBConnector.getConnection().createStatement();
                 st.executeUpdate(query);
                 mav = new ModelAndView("welcome");
+                
                 return mav;
             }
 			mav.addObject("firstname", user.getFirstname());

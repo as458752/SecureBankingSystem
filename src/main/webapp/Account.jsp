@@ -111,6 +111,14 @@ function CreateAccount(id,id2){
 			    f.submit();
 	
 }
+function getHistory(id){
+
+	   var f=document.form;
+	     f.method="post";
+	    f.action='Transaction_History.jsp?id='+id;
+	    f.submit();
+
+}
 </script>
         
         
@@ -190,6 +198,7 @@ if(!SessionManagement.check(request, "user_role").equals("4") && !SessionManagem
 <td><input type="button" name="delete" value="Delete" style="background-color:green;font-weight:bold;color:white;" onclick="deleteAccount(<%=rs.getString(1)%>);" ></td>
 <%}else{ %>
 <td><input type="submit" name="Transact" class="btn btn-lg btn-primary btn-block" value="<%=rs.getString(1)%>"></td>
+<td><input type="button" name="history" class="btn btn-lg btn-primary btn-block" value="Retrieve"  onclick="getHistory(<%=rs.getString(1)%>);" ></td>
 <% } %>
 </tr>
 <% } %>

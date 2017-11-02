@@ -7,8 +7,24 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.support.rowset.SqlRowSet;
 
 public class DBConnector {
+    @Autowired
+    private static UserDefinedJDBCTemplate template;
+    
+    public static SqlRowSet execute(String sql,Object[] args,int[] argTypes)
+    {
+        try{
+            return template.getJdbcTemplate().queryForRowSet(sql, args, argTypes);
+        }catch(Exception e)
+        {
+            return null;
+        }
+    }
+    
+    
 	private static Connection con = null;
 	public static Connection getConnection() {
 		try {

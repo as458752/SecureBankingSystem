@@ -42,7 +42,7 @@
     		
     		String id = request.getParameter("id");
     		
-    		if(id==null || id.equals("") || id.equals("null") || id.equals("NULL")){
+    		if(id==null || id.equals("") || id.equals("null") || id.equals("NULL") || (!SessionManagement.check(request,"user_id").equals(id) && !SessionManagement.check(request,"user_role").equals("3"))){
     			response.sendRedirect("AuthError.jsp");
     			return;
     		}

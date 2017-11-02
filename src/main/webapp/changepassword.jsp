@@ -34,6 +34,7 @@ function validateSession(){
 	    catch(Exception e)
 	    {
 		    response.sendRedirect("error.jsp");
+                    return;
 	    } 
 	%>
 }
