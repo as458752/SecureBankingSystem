@@ -69,7 +69,7 @@ function validateSession(){
 				//rs = DBConnector.getQueryResult("select * from users where user_id="+SessionManagement.check(request, "user_id"));
                                 rs = DBConnector.execute("select * from users where user_id=?", new Object[]{Integer.parseInt(SessionManagement.check(request, "user_id"))}, new int[]{Types.INTEGER});
 				rs.next();
-                                String email = rs.getNString("email");
+                                String email = rs.getString("email");
                                 //String email = (String)DBConnector.getMatchedValuesFromResultSet(rs,"email").get(0);
 				EmailOTPSender.getEmailOTPSender().sendMail("Status of approval", "The status of your request to view & modify this user's profile : "+status, email);
 				response.sendRedirect("ApprovalStatus.jsp");
